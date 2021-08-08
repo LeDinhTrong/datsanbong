@@ -1,4 +1,4 @@
-class M800BookingModel {
+class BookingModel {
   String? id;
   String? User_Id;
   String? Field_Id;
@@ -8,7 +8,7 @@ class M800BookingModel {
   String? Total;
   String? Message;
 
-  M800BookingModel(
+  BookingModel(
       {this.id,
       this.User_Id,
       this.Field_Id,
@@ -18,7 +18,7 @@ class M800BookingModel {
       this.Total,
       this.Message});
 
-  M800BookingModel.fromJson(Map<String, dynamic> json) {
+  BookingModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     User_Id = json['User_Id'];
     Field_Id = json['Field_Id'];

@@ -11,6 +11,18 @@ class BookingBloc {
   Stream<List<M800BookingModel>> get bookingStream800 =>
       _bookingSubject800.stream;
 
+  // for what 801
+  List<M800BookingModel> listBooking801 = [];
+  final _bookingSubject801 = PublishSubject<List<M800BookingModel>>();
+  Stream<List<M800BookingModel>> get bookingStream801 =>
+      _bookingSubject801.stream;
+
+  // for what 803
+  List<M800BookingModel> listBooking803 = [];
+  final _bookingSubject803 = PublishSubject<List<M800BookingModel>>();
+  Stream<List<M800BookingModel>> get bookingStream803 =>
+      _bookingSubject803.stream;
+
   // for what 805
   List<M800BookingModel> listBooking805 = [];
   final _bookingSubject805 = PublishSubject<List<M800BookingModel>>();
@@ -21,14 +33,31 @@ class BookingBloc {
   List<M800BookingModel> listBooking807 = [];
   final _bookingSubject807 = PublishSubject<List<M800BookingModel>>();
   Stream<List<M800BookingModel>> get bookingStream807 =>
-      _bookingSubject805.stream;
+      _bookingSubject807.stream;
+
+  // for what 808
+  List<M800BookingModel> listBooking808 = [];
+  final _bookingSubject808 = PublishSubject<List<M800BookingModel>>();
+  Stream<List<M800BookingModel>> get bookingStream808 =>
+      _bookingSubject808.stream;
+
+  // for what 809
+  List<M800BookingModel> listBooking809 = [];
+  final _bookingSubject809 = PublishSubject<List<M800BookingModel>>();
+  Stream<List<M800BookingModel>> get bookingStream809 =>
+      _bookingSubject809.stream;
 
   /**                                                                                                                                                                                           
    * dispose subject                                                                                                                                                                            
    */
   void dispose() {
     _bookingSubject800.close();
+    _bookingSubject801.close();
+    _bookingSubject803.close();
     _bookingSubject805.close();
+    _bookingSubject807.close();
+    _bookingSubject808.close();
+    _bookingSubject809.close();
   }
 
   /**                                                                                                                                                                                           
@@ -46,6 +75,61 @@ class BookingBloc {
         }
       }).whenComplete(() {
         _bookingSubject800.sink.add(listBooking800);
+      });
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  /**                                                                                                                                                                                           
+   * callWhat801 insert data                                                                                                                            
+   */
+  callWhat801(String eventName, DateTime from, DateTime to, int status,
+      String userId, String fieldId, String total) async {
+    try {
+      var what = 801;
+      var param = {
+        "Message": eventName,
+        "Start": "$from",
+        "End": "$to",
+        "Status": status,
+        "User_Id": userId,
+        "Field_Id": fieldId,
+        "Total": total
+      };
+
+      await _repository.executeService(what, param).then((value) {
+        if (value.length != 0) {
+          listBooking801.addAll(value);
+        } else {
+          listBooking801 = [];
+        }
+      }).whenComplete(() {
+        _bookingSubject801.sink.add(listBooking801);
+      });
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  /**                                                                                                                                                                                           
+   * callWhat803 delete all data Booking                                                                                                                             
+   */
+  callWhat803(int id) async {
+    try {
+      var what = 803;
+      var param = {"id": id};
+
+      await _repository.executeService(what, param).then((value) {
+        if (value.length != 0) {
+          listBooking803.addAll(value);
+        } else {
+          listBooking803 = [];
+        }
+      }).whenComplete(() {
+        _bookingSubject803.sink.add(listBooking803);
       });
     } catch (e) {
       print(e);
@@ -100,6 +184,52 @@ class BookingBloc {
         }
       }).whenComplete(() {
         _bookingSubject807.sink.add(listBooking807);
+      });
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  /**                                                                                                                                                                                           
+   * callWhat808 get data with User_Id                                                                                                                             
+   */
+  callWhat808(int userId) async {
+    try {
+      var what = 808;
+      var param = {"User_Id": userId};
+
+      await _repository.executeService(what, param).then((value) {
+        if (value.length != 0) {
+          listBooking808.addAll(value);
+        } else {
+          listBooking808 = [];
+        }
+      }).whenComplete(() {
+        _bookingSubject808.sink.add(listBooking808);
+      });
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  /**                                                                                                                                                                                           
+   * callWhat808 get data with User_Id and Field_Name                                                                                                                            
+   */
+  callWhat809(int userId) async {
+    try {
+      var what = 809;
+      var param = {"User_Id": userId};
+
+      await _repository.executeService(what, param).then((value) {
+        if (value.length != 0) {
+          listBooking809.addAll(value);
+        } else {
+          listBooking809 = [];
+        }
+      }).whenComplete(() {
+        _bookingSubject809.sink.add(listBooking809);
       });
     } catch (e) {
       print(e);

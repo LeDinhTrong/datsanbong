@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:field_for_rent/blocs/login_bloc.dart';
+import 'package:field_for_rent/models/m500_user_model.dart';
 import 'package:field_for_rent/pages/components/bottom_navigation_bar.dart';
 import 'package:field_for_rent/pages/components/input_field.dart';
 import 'package:field_for_rent/pages/components/or_divider.dart';
@@ -5,7 +9,10 @@ import 'package:field_for_rent/pages/components/password_field.dart';
 import 'package:field_for_rent/pages/components/social_icon.dart';
 import 'package:field_for_rent/pages/constants.dart';
 import 'package:field_for_rent/pages/views/signup_view.dart';
+import 'package:field_for_rent/repositories/repositories.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInPage extends StatefulWidget {
   SignInPage({Key? key}) : super(key: key);
@@ -15,9 +22,106 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  SharedPreferences? prefs;
+  final _repository = Repository();
+  final _loginBloc = LoginBloc();
+  bool isLogin = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _loginBloc.dispose();
+  }
+
+  void _login(BuildContext context) async {
+    Map<String, dynamic> param = {};
+    param['Email'] = emailController.text.trim();
+    param['Password'] = passwordController.text.trim();
+
+    if (_loginBloc.isValidEmail(emailController.text) == true &&
+        _loginBloc.isValidPass(passwordController.text) == true) {
+      await _repository.r500UserProvider
+          .p500User(508, param)
+          .then((value) async {
+        print(value.first.Email);
+        prefs = await SharedPreferences.getInstance();
+        print(prefs!.getString('access_token'));
+        await prefs!.setString('id', value[0].id);
+        if (value.length != 0) {
+          setState(() {
+            isLogin = true;
+          });
+          if (isLogin = true) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => BottomNaviBar()));
+          }
+          EasyLoading.showSuccess('Login Succsess!');
+        } else {
+          EasyLoading.showError('The email or password is incorrect');
+        }
+      }).catchError((error, stackTrace) {
+        print("loi");
+        EasyLoading.showError("The email or password is incorrect");
+      });
+    }
+  }
+
+  builEmailFormField(AsyncSnapshot snapshot) {
+    return TextFormField(
+      controller: emailController,
+      decoration: InputDecoration(
+        fillColor: Colors.white,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey),
+          gapPadding: 10,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey),
+          gapPadding: 10,
+        ),
+        errorText: snapshot.hasError ? "${snapshot.error}" : null,
+        hintText: "Email",
+        hintStyle: TextStyle(color: kPrimaryColor),
+        border: InputBorder.none,
+      ),
+    );
+  }
+
+  buiPasswordFormField(AsyncSnapshot snapshot) {
+    return TextFormField(
+      controller: passwordController,
+      obscureText: true,
+      decoration: InputDecoration(
+        fillColor: Colors.white,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey),
+          gapPadding: 10,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey),
+          gapPadding: 10,
+        ),
+        errorText: snapshot.hasError ? "${snapshot.error}" : null,
+        hintText: "Password",
+        hintStyle: TextStyle(color: kPrimaryColor),
+        border: InputBorder.none,
+      ),
+    );
+  }
+
   final globalKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -54,36 +158,17 @@ class _SignInPageState extends State<SignInPage> {
                   key: globalKey,
                   child: Column(
                     children: [
-                      InputField(
-                        controller: emailController,
-                        hintText: "Email",
-                        validator: (emailController) {
-                          if (emailController.isNotEmpty &&
-                              emailController.contains("@")) {
-                            return null;
-                          } else if (emailController.isNotEmpty &&
-                              emailController.contains("@")) {
-                            return "Email is invalid";
-                          } else {
-                            return "Enter your email";
-                          }
-                        },
-                      ),
-                      PasswordField(
-                        controller: passwordController,
-                        hintText: "Password",
-                        validator: (passwordController) {
-                          if (passwordController.isNotEmpty &&
-                              passwordController.length > 6) {
-                            return null;
-                          } else if (passwordController.isNotEmpty &&
-                              passwordController.length < 7) {
-                            return "Your password is short!!!";
-                          } else {
-                            return "Enter your password";
-                          }
-                        },
-                      ),
+                      StreamBuilder(
+                          stream: _loginBloc.emailStream,
+                          builder: (context, snapshot) {
+                            return builEmailFormField(snapshot);
+                          }),
+                      SizedBox(height: size.height * 0.02),
+                      StreamBuilder(
+                          stream: _loginBloc.passwordStream,
+                          builder: (context, AsyncSnapshot snapshot) {
+                            return buiPasswordFormField(snapshot);
+                          }),
                     ],
                   ),
                 ),
@@ -103,12 +188,10 @@ class _SignInPageState extends State<SignInPage> {
                           MaterialStateProperty.all<Color>(kPrimaryColor),
                     ),
                     onPressed: () {
-                      if (globalKey.currentState!.validate()) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BottomNaviBar()));
-                      }
+                      _login(context);
+                      // if (globalKey.currentState!.validate()) {
+
+                      // }
                     },
                     child: Text(
                       "Sign In",

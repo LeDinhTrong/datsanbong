@@ -51,6 +51,23 @@ class R800BookingProvider {
         }
         break;
 
+      // Delete data
+      case 803:
+        try {
+          final response = await DioUtil.post(param);
+          Map<String, dynamic> result = jsonDecode(response.toString());
+          if (result['status'] == true) {
+            return List<M800BookingModel>.from(result['data']
+                .map((model) => M800BookingModel.fromJson(model)));
+          } else {
+            throw Exception(result['error']);
+          }
+        } catch (e) {
+          print("AuthenticationService authWithToken $e");
+          throw e;
+        }
+        break;
+
       // Update data Booking
       case 802:
         try {
@@ -133,6 +150,38 @@ class R800BookingProvider {
 
       // Find data with Field_Id
       case 807:
+        try {
+          final response = await DioUtil.post(param);
+          Map<String, dynamic> result = jsonDecode(response.toString());
+          if (result['status'] == true) {
+            return List<M800BookingModel>.from(result['data']
+                .map((model) => M800BookingModel.fromJson(model)));
+          } else {
+            throw Exception(result['error']);
+          }
+        } catch (e) {
+          throw e;
+        }
+        break;
+
+      // Find data with User_Id
+      case 808:
+        try {
+          final response = await DioUtil.post(param);
+          Map<String, dynamic> result = jsonDecode(response.toString());
+          if (result['status'] == true) {
+            return List<M800BookingModel>.from(result['data']
+                .map((model) => M800BookingModel.fromJson(model)));
+          } else {
+            throw Exception(result['error']);
+          }
+        } catch (e) {
+          throw e;
+        }
+        break;
+
+      // Find data with User_Id
+      case 809:
         try {
           final response = await DioUtil.post(param);
           Map<String, dynamic> result = jsonDecode(response.toString());

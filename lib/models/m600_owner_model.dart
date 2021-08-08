@@ -5,16 +5,15 @@ class M600OwnerModel {
   String? Email;
   String? Password;
   String? Avatar_Url;
-  String? Token;
 
-  M600OwnerModel(
-      {this.id,
-      this.Name,
-      this.Phone,
-      this.Email,
-      this.Password,
-      this.Avatar_Url,
-      this.Token});
+  M600OwnerModel({
+    this.id,
+    this.Name,
+    this.Phone,
+    this.Email,
+    this.Password,
+    this.Avatar_Url,
+  });
 
   M600OwnerModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -23,7 +22,6 @@ class M600OwnerModel {
     Email = json['Email'];
     Password = json['Password'];
     Avatar_Url = json['Avatar_Url'];
-    Token = json['Token'];
   }
 
   Map<String, dynamic> toJson() {
@@ -34,7 +32,7 @@ class M600OwnerModel {
     data['Email'] = this.Email;
     data['Password'] = this.Password;
     data['Avatar_Url'] = this.Avatar_Url;
-    data['Token'] = this.Token;
+
     return data;
   }
 }

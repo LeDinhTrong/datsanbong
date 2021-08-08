@@ -5,11 +5,13 @@ class PasswordField extends StatelessWidget {
   final dynamic validator;
   final TextEditingController controller;
   final String hintText;
+  final errorText;
   const PasswordField(
       {Key? key,
       required this.controller,
       required this.hintText,
-      this.validator})
+      this.validator,
+      this.errorText})
       : super(key: key);
 
   @override
@@ -34,6 +36,7 @@ class PasswordField extends StatelessWidget {
             borderSide: BorderSide(color: Colors.grey),
             gapPadding: 10,
           ),
+          errorText: errorText,
           hintText: hintText,
           hintStyle: TextStyle(color: kPrimaryColor),
           border: InputBorder.none,

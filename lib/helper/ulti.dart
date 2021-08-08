@@ -7,7 +7,7 @@ class Ulti {
   // static const String BASE_URL_API = 'http://192.168.1.11:4000/api/';
   // static const String BASE_URL_CDN = 'http://192.168.1.11:4000/';
   static const String BASE_URL_API =
-      'http://127.0.0.1/field_for_rent/backend/P1Controller/C3Mobile/SelectAllByWhat.php';
+      'http://10.0.2.2/field_for_rent/backend/P1Controller/C3Mobile/SelectAllByWhat.php';
   static const String BASE_URL_CDN = 'https://apibonds.crudcode.tk/';
 
   Ulti();

@@ -1,49 +1,38 @@
+import 'package:field_for_rent/method/formatted_date.dart';
 import 'package:field_for_rent/models/m700_footbalfield_model.dart';
-import 'package:field_for_rent/models/m800_booking_model.dart';
 import 'package:field_for_rent/models/m900_imagefield_model.dart';
 import 'package:field_for_rent/pages/components/text_span.dart';
 import 'package:field_for_rent/pages/constants.dart';
 import 'package:field_for_rent/pages/views/booking.dart';
 import 'package:field_for_rent/repositories/repositories.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class Api {
-  getBooking() async {
-    final _repo = Repository();
-    List<M800BookingModel> bookingData = [];
-    await _repo.r800BookingProvider.p800Booking(800, {}).then((value) async {
-      for (var i = 0; i < value.length; i++) {
-        bookingData.add(value[i]);
-      }
-    });
-    print('aaaaaaa');
-    return booking;
-  }
-}
-
-Future<Map<String, dynamic>> getImg(String j) async {
-  Map<String, dynamic> data = {};
-  final _repo = Repository();
-  data["img"] =
-      await _repo.r900ImageFieldProvider.p900ImageField(907, {'Field_Id': j});
-  data["field"] =
-      await _repo.r700FootbalFieldProvider.p700FootbalField(704, {'id': j});
-  data["booking"] =
-      await _repo.r800BookingProvider.p800Booking(807, {'Field_Id': j});
-  print(data["booking"]);
-  return data;
-}
-
-class FieldDetail extends StatelessWidget {
+class FieldDetail extends StatefulWidget {
   final String idField;
   FieldDetail({required this.idField});
+
+  @override
+  _FieldDetailState createState() => _FieldDetailState();
+}
+
+class _FieldDetailState extends State<FieldDetail> {
+  Future<Map<String, dynamic>> getImg(String j) async {
+    Map<String, dynamic> data = {};
+    final _repo = Repository();
+    data["img"] =
+        await _repo.r900ImageFieldProvider.p900ImageField(907, {'Field_Id': j});
+    data["field"] =
+        await _repo.r700FootbalFieldProvider.p700FootbalField(704, {'id': j});
+    return data;
+  }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
     return FutureBuilder(
-      future: getImg(idField.toString()),
+      future: getImg(widget.idField.toString()),
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         if (snapshot.hasData) {
           List<M900ImageFieldModel> imgData = snapshot.data["img"];
@@ -91,19 +80,36 @@ class FieldDetail extends StatelessWidget {
                             style: TextStyle(
                                 fontSize: 22, fontWeight: FontWeight.w500),
                           ),
-                          SizedBox(height: size.height * 0.04),
+                          SizedBox(height: size.height * 0.03),
                           Text(
                             fieldModel.Description.toString(),
                           ),
-                          SizedBox(height: size.height * 0.04),
+                          SizedBox(height: size.height * 0.03),
+                          Row(
+                            children: [
+                              Text("Telephone Number: "),
+                              InkWell(
+                                onTap: () async {
+                                  launch("tel:0322564588");
+                                },
+                                child: Text(
+                                  "0322564588",
+                                  style: TextStyle(color: kPrimaryColor),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: size.height * 0.01),
                           Row(
                             children: [
                               FakeTextSpan(
                                   text1: "Start: ",
-                                  text2: "${fieldModel.OpenAt.toString()}"),
+                                  text2:
+                                      "${convertDate(fieldModel.OpenAt.toString())} h"),
                               FakeTextSpan(
                                   text1: " to: ",
-                                  text2: "${fieldModel.CloseAt.toString()}"),
+                                  text2:
+                                      "${convertDate(fieldModel.CloseAt.toString())} h"),
                             ],
                           ),
                           Container(
@@ -172,12 +178,12 @@ class FieldDetail extends StatelessWidget {
                                             kPrimaryColor),
                                   ),
                                   onPressed: () {
-                                    // Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (context) => BookingPage(
-                                    //               index: idField.toString(),
-                                    //             )));
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => BookingPage(
+                                                  fieldId: widget.idField,
+                                                )));
                                   },
                                   child: Text(
                                     "Booking",

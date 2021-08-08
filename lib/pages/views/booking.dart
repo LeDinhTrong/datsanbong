@@ -1,136 +1,235 @@
-import 'package:field_for_rent/method/events.dart';
+import 'package:confirm_dialog/confirm_dialog.dart';
+import 'package:field_for_rent/method/formatted_date.dart';
 import 'package:field_for_rent/models/m800_booking_model.dart';
+import 'package:field_for_rent/pages/components/bottom_navigation_bar.dart';
+import 'package:field_for_rent/pages/constants.dart';
+import 'package:field_for_rent/pages/views/event_editing.dart';
 import 'package:field_for_rent/repositories/repositories.dart';
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-var booking;
-getBooking() async {
-  final _repo = Repository();
-  List<M800BookingModel> bookingData = [];
-  await _repo.r800BookingProvider.p800Booking(800, {}).then((value) async {
-    for (var i = 0; i < value.length; i++) {
-      bookingData.add(value[i]);
-    }
-  });
-  booking = bookingData;
-  return booking;
-}
+class BookingPage extends StatefulWidget {
+  final String fieldId;
+  BookingPage({required this.fieldId});
 
-class TableEventsExample extends StatefulWidget {
   @override
-  _TableEventsExampleState createState() => _TableEventsExampleState();
+  _BookingPageState createState() => _BookingPageState();
 }
 
-class _TableEventsExampleState extends State<TableEventsExample> {
-  late final ValueNotifier<List<Event>> _selectedEvents;
-  CalendarFormat _calendarFormat =
-      CalendarFormat.month; // Can be toggled on/off by longpressing a date
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-  DateTime? _rangeStart;
-  DateTime? _rangeEnd;
+class _BookingPageState extends State<BookingPage> {
+  final _repo = Repository();
+
+  Future<List<Event>> getBooking() async {
+    List<Event> bookingData = [];
+    await _repo.r800BookingProvider.p800Booking(800, {}).then((value) async {
+      for (var i = 0; i < value.length; i++) {
+        M800BookingModel bookingModel = value[i];
+        bookingData.add(Event(
+          eventName: bookingModel.Message.toString(),
+          from: convertTime(bookingModel.Start.toString()),
+          to: convertTime(bookingModel.End.toString()),
+        ));
+      }
+    });
+    return bookingData;
+  }
 
   @override
   void initState() {
     super.initState();
-
-    _selectedDay = _focusedDay;
-    _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
-  }
-
-  @override
-  void dispose() {
-    _selectedEvents.dispose();
-    super.dispose();
-  }
-
-  List<Event> _getEventsForDay(DateTime day) {
-    return kEvents[day] ?? [];
-  }
-
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    if (!isSameDay(_selectedDay, selectedDay)) {
-      setState(() {
-        _selectedDay = selectedDay;
-        _focusedDay = focusedDay;
-        _selectedEvents.value = _getEventsForDay(selectedDay);
-      });
-    }
+    getBooking();
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget _calendarWidget(Size size, data) {
+      return Expanded(
+        flex: 12,
+        child: SfCalendar(
+          view: CalendarView.month,
+          initialSelectedDate: DateTime.now(),
+          dataSource: EventDataSource(data),
+          monthViewSettings: MonthViewSettings(
+              showAgenda: true, agendaViewHeight: size.height * 0.3),
+        ),
+      );
+    }
+
+    Size size = MediaQuery.of(context).size;
     return FutureBuilder(
-      future: getBooking(),
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        if (snapshot.hasData) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('TableCalendar - Events'),
-            ),
-            body: Column(
-              children: [
-                TableCalendar<Event>(
-                  firstDay: DateTime(DateTime.now().year - 5),
-                  lastDay: DateTime(DateTime.now().year + 5),
-                  focusedDay: _focusedDay,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                  rangeStartDay: _rangeStart,
-                  rangeEndDay: _rangeEnd,
-                  calendarFormat: _calendarFormat,
-                  eventLoader: _getEventsForDay,
-                  startingDayOfWeek: StartingDayOfWeek.monday,
-                  calendarStyle: CalendarStyle(
-                    // Use `CalendarStyle` to customize the UI
-                    outsideDaysVisible: false,
-                  ),
-                  onDaySelected: _onDaySelected,
-                  onFormatChanged: (format) {
-                    if (_calendarFormat != format) {
-                      setState(() {
-                        _calendarFormat = format;
-                      });
-                    }
-                  },
-                  onPageChanged: (focusedDay) {
-                    _focusedDay = focusedDay;
-                  },
+        future: getBooking(),
+        builder: (context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.hasData) {
+            print(snapshot.data.length);
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: kPrimaryLightColor,
+                title: Text("Booking"),
+                centerTitle: true,
+              ),
+              body: SafeArea(
+                child: Column(
+                  children: [
+                    //Calendar widget
+                    _calendarWidget(size, snapshot.data),
+
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FloatingActionButton(
+                              backgroundColor: kPrimaryColor,
+                              child: Icon(
+                                Icons.add,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => EventEditingPage(
+                                              fieldId: widget.fieldId,
+                                            ))).then((value) {
+                                  setState(() {});
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        height: double.infinity,
+                        width: double.infinity,
+                        child: Stack(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              height: double.infinity,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: kPrimaryLightColor,
+                              ),
+                              child: Row(
+                                children: [
+                                  // Text(
+                                  //   "Price: ",
+                                  //   style: TextStyle(color: kPrimaryColor, fontSize: 20),
+                                  // ),
+                                  // Text(
+                                  //   fieldModel.Price_Per_Hour.toString() + " vnd/h",
+                                  //   style: TextStyle(
+                                  //       color: Colors.white, fontSize: 20),
+                                  // ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Container(
+                                  height: double.infinity,
+                                  width: 150,
+                                  child: ElevatedButton(
+                                      style: ButtonStyle(
+                                        foregroundColor:
+                                            MaterialStateProperty.all<Color>(
+                                                kPrimaryColor),
+                                        backgroundColor:
+                                            MaterialStateProperty.all<Color>(
+                                                kPrimaryColor),
+                                      ),
+                                      onPressed: () async {
+                                        if (await confirm(
+                                          context,
+                                          title: Text('Confirm'),
+                                          content: Text(
+                                              'Are you sure you want to booking?'),
+                                          textOK: Text('Yes'),
+                                          textCancel: Text('No'),
+                                        )) {
+                                          Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      BottomNaviBar()));
+                                        }
+                                      },
+                                      child: Text(
+                                        "Booking",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 20),
+                                      )),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8.0),
-                Expanded(
-                  child: ValueListenableBuilder<List<Event>>(
-                    valueListenable: _selectedEvents,
-                    builder: (context, value, _) {
-                      return ListView.builder(
-                        itemCount: value.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 12.0,
-                              vertical: 4.0,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: ListTile(
-                              onTap: () => print('${value[index]}'),
-                              title: Text('${value[index]}'),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            );
+          }
+          return Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: Colors.white,
+            child: Center(child: CircularProgressIndicator()),
           );
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
-    );
+        });
   }
+}
+
+class EventDataSource extends CalendarDataSource {
+  EventDataSource(List<Event> source) {
+    appointments = source;
+  }
+
+  @override
+  DateTime getStartTime(int index) {
+    return appointments![index].from;
+  }
+
+  @override
+  DateTime getEndTime(int index) {
+    return appointments![index].to;
+  }
+
+  @override
+  String getSubject(int index) {
+    return appointments![index].eventName;
+  }
+
+  @override
+  Color getColor(int index) {
+    return appointments![index].background;
+  }
+
+  @override
+  bool isAllDay(int index) {
+    return appointments![index].isAllDay;
+  }
+}
+
+class Event {
+  Event(
+      {required this.eventName,
+      required this.from,
+      required this.to,
+      this.background = kPrimaryColor,
+      this.isAllDay = false});
+
+  String eventName;
+  DateTime from;
+  DateTime to;
+  Color background;
+  bool isAllDay;
 }

@@ -6,12 +6,14 @@ class InputField extends StatelessWidget {
   final onChanged;
   final TextEditingController controller;
   final String hintText;
+  final errorText;
   const InputField({
     Key? key,
     required this.controller,
     required this.hintText,
     this.onChanged,
     this.validator,
+    this.errorText,
   }) : super(key: key);
 
   @override
@@ -35,6 +37,7 @@ class InputField extends StatelessWidget {
             borderSide: BorderSide(color: Colors.grey),
             gapPadding: 10,
           ),
+          errorText: errorText,
           hintText: hintText,
           hintStyle: TextStyle(color: kPrimaryColor),
           border: InputBorder.none,

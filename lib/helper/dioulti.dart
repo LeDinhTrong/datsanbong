@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:field_for_rent/repositories/repositories.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http_parser/http_parser.dart';
 
@@ -19,6 +21,7 @@ const httpHeaders = {
 
 class DioUtil {
   static Dio dio = new Dio();
+  static Repository repository = new Repository();
 
   DioUtil() {
     checkConnect();
@@ -122,36 +125,45 @@ class DioUtil {
     }
   }
 
-  static Future uploadImage(File imageFile, String currentDatetime) async {
+  static Future uploadImage(
+      File imageFile, String currentDatetime, String url) async {
+    EasyLoading.show(status: 'loading...');
     var stream;
     try {
       stream =
           new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
+      var length = await imageFile.length();
+      var uploadURL =
+          "https://api.giadinhsunkun.com/p7fiveSBS/P5Upload/UploadImage.php";
+      var uri = Uri.parse(uploadURL);
+
+      var request = new http.MultipartRequest("POST", uri);
+      print('request $request');
+
+      var multipartFile = new http.MultipartFile("file", stream, length,
+          filename: basename(imageFile.path));
+
+      request.files.add(multipartFile);
+      request.fields['current_datetime'] = currentDatetime;
+
+      var response = await request.send();
+      // if (response.statusCode == 200) {
+      //   var dataResult =
+      //       await repository.r1000ImageProvider.p1000Image(1001, {'Url': url});
+      //   return dataResult;
+      // } else {
+      //   throw Exception();
+      // }
+      // return _m1000ImageModel;
     } catch (exception) {
       print("error");
       return null;
     }
-
-    var length = await imageFile.length();
-    var uploadURL =
-        "https://api.giadinhsunkun.com/p7fiveSBS/P5Upload/UploadImage.php";
-    var uri = Uri.parse(uploadURL);
-
-    var request = new http.MultipartRequest("POST", uri);
-
-    var multipartFile = new http.MultipartFile("file", stream, length,
-        filename: basename(imageFile.path));
-
-    request.files.add(multipartFile);
-    request.fields['current_datetime'] = currentDatetime;
-
-    var response = await request.send();
-    if (response.statusCode == 200) {
-    } else {}
   }
 
-  static Future uploadFile(file, currentDatetime) async {
+  static Future uploadFile(file, currentDatetime, url, name) async {
     try {
+      EasyLoading.show(status: 'loading...');
       String fileName = file.path.split('/').last;
       FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(file.path, filename: fileName),
@@ -160,16 +172,24 @@ class DioUtil {
 
       Response response;
       var uploadURL =
-          "https://api.giadinhsunkun.com/p6bookingcar/P5Upload/UploadFile.php";
+          "https://api.giadinhsunkun.com/p7fiveSBS/P5Upload/UploadFile.php";
       var uri = Uri.parse(uploadURL);
 
       response = await dio.post(uploadURL, data: formData);
+      // if (response.statusCode == 200) {
+      //   var dataResult = await repository.r900LinkFileProvider
+      //       .p900LinkFile(901, {'Url': url, 'Name': name});
+      //   return dataResult;
+      // } else {
+      //   throw Exception();
+      // }
 
-      if (checkStatusCodeSuccess(response.statusCode!)) {
-        return response;
-      } else {
-        throw Exception("Dio Interface exception R");
-      }
+      // if (checkStatusCodeSuccess(response.statusCode!)) {
+      //   print('bbbbbb $response');
+      //   return response;
+      // } else {
+      //   throw Exception("Dio Interface exception R");
+      // }
     } on DioError catch (e) {
       print("Dio upload error $e");
       if (e.response != null) {

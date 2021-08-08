@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 class BadgeDecoration extends Decoration {
-  final UserModel item;
   final Color badgeColor;
   final double badgeSize;
   final TextSpan textSpan;
   BadgeDecoration(
-      {required this.item,
-      required this.badgeColor,
+      {required this.badgeColor,
       required this.badgeSize,
       required this.textSpan});
 
