@@ -152,6 +152,7 @@ class R500UserProvider {
         try {
           final response = await DioUtil.postLogin(param);
           Map<String, dynamic> result = jsonDecode(response.toString());
+          print('test: ${result}');
           if (result['status'] == true) {
             return List<M500UserModel>.from(
                 result['data'].map((model) => M500UserModel.fromJson(model)));

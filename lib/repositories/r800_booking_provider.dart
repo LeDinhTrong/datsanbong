@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:field_for_rent/models/history_model.dart';
+
 import '../models/models.dart';
 import '../helper/dioulti.dart';
 
@@ -186,8 +188,8 @@ class R800BookingProvider {
           final response = await DioUtil.post(param);
           Map<String, dynamic> result = jsonDecode(response.toString());
           if (result['status'] == true) {
-            return List<M800BookingModel>.from(result['data']
-                .map((model) => M800BookingModel.fromJson(model)));
+            return List<HistoryModel>.from(
+                result['data'].map((model) => HistoryModel.fromJson(model)));
           } else {
             throw Exception(result['error']);
           }

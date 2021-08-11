@@ -1,6 +1,7 @@
 import 'package:field_for_rent/blocs/b500_user_bloc.dart';
 import 'package:field_for_rent/blocs/b700_footbalfield_bloc.dart';
 import 'package:field_for_rent/models/m700_footbalfield_model.dart';
+import 'package:field_for_rent/pages/components/routes.dart';
 import 'package:field_for_rent/pages/components/text_span.dart';
 import 'package:field_for_rent/pages/constants.dart';
 import 'package:field_for_rent/pages/views/account_page.dart';
@@ -21,7 +22,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  SharedPreferences? _prefs;
   final _userBloc = UserBloc();
   final _fieldBloc = FootbalFieldBloc();
   final _repo = Repo();
@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   var destinationLat;
   var destinationLng;
   var distanceCal;
+  SharedPreferences? _prefs;
   List distanceList = [];
   List<M700FootbalFieldModel>? _fieldModelList;
 
@@ -39,7 +40,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     listent();
     getCurrentLocation();
-    print('2222');
   }
 
   @override
@@ -61,7 +61,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   _init() async {
-    print('2222');
     _prefs = await SharedPreferences.getInstance();
     _userBloc.callWhat504(int.parse(_prefs!.getString('id')!));
     _fieldBloc.callWhat700();
@@ -86,12 +85,18 @@ class _HomePageState extends State<HomePage> {
         startLat, startLng, destinationLat, destinationLng);
     if (distanceModel.result.routes.length > 0) {
       distanceCal = distanceModel.result.routes[0].distance.text;
-      print(distanceCal);
-
       setState(() {
         distanceList[i] = distanceCal;
       });
     }
+  }
+
+  _accountOnPress(BuildContext context) {
+    return Navigator.push(
+            context, MaterialPageRoute(builder: (context) => AccountPage()))
+        .then((value) {
+      _userBloc.callWhat504(int.parse(_prefs!.getString('id')!));
+    });
   }
 
   Widget _header(size, snapshot) {
@@ -101,18 +106,32 @@ class _HomePageState extends State<HomePage> {
         Container(
           child: Row(
             children: [
-              IconButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => AccountPage()));
-                  },
-                  icon: Icon(
-                    Icons.account_circle_outlined,
-                    color: Colors.white,
-                    size: size.height * 0.04,
-                  )),
+              InkWell(
+                onTap: () {
+                  _accountOnPress(context);
+                },
+                child: Container(
+                  width: size.width / 10,
+                  height: size.width / 10,
+                  margin: new EdgeInsets.symmetric(horizontal: 16.0),
+                  alignment: FractionalOffset.center,
+                  decoration: BoxDecoration(
+                      border: Border.all(width: 4, color: Colors.white),
+                      boxShadow: [
+                        BoxShadow(
+                            spreadRadius: 2,
+                            blurRadius: 10,
+                            color: Colors.black.withOpacity(0.1))
+                      ],
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image:
+                              AssetImage("${snapshot.data.first.Avatar_Url}"))),
+                ),
+              ),
               Text(
-                snapshot.data[0].Name,
+                snapshot.data.first.Name,
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ],
@@ -197,8 +216,7 @@ class _HomePageState extends State<HomePage> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => FieldDetail(
-                            idField: _fieldModelList![i].id.toString(),
-                          )));
+                          idField: int.parse(_fieldModelList![i].idField!))));
             },
             child: Card(
               shape: RoundedRectangleBorder(
@@ -206,36 +224,43 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _fieldModelList![i].Name.toString(),
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w500),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 23),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _fieldModelList![i].Name.toString(),
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w500),
+                          ),
+                          FakeTextSpan(
+                              text1: "Distance: ",
+                              text2:
+                                  '${distanceList.length > 0 ? distanceList[i] : 0}'),
+                          FakeTextSpan(
+                              text1: "Price: ",
+                              text2: "${_fieldModelList![i].Price_Per_Hour}" +
+                                  " vnd/h"),
+                        ],
                       ),
-                      FakeTextSpan(
-                          text1: "Distance: ",
-                          text2:
-                              '${distanceList.length > 0 ? distanceList[i] : 0}'),
-                      FakeTextSpan(
-                          text1: "Price: ",
-                          text2: _fieldModelList![i].Price_Per_Hour.toString() +
-                              " vnd/h"),
-                    ],
+                    ),
                   ),
-                  Container(
-                      margin: EdgeInsets.symmetric(vertical: 10),
-                      height: 110,
-                      width: 150,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        shape: BoxShape.rectangle,
-                        image: DecorationImage(
-                            image: AssetImage(
-                                _fieldModelList![i].Avatar_Url.toString()),
-                            fit: BoxFit.cover),
-                      )),
+                  Expanded(
+                    child: Container(
+                        margin:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                        height: 110,
+                        width: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                              image: AssetImage(
+                                  "${_fieldModelList![i].Avatar_Url}"),
+                              fit: BoxFit.cover),
+                        )),
+                  ),
                 ],
               ),
             ),

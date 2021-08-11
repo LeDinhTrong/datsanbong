@@ -25,8 +25,8 @@ String calTotalTime(DateTime startTime, DateTime endTime) {
   return '$minuts';
 }
 
-calTotalPrice(DateTime from, DateTime to) {
+calTotalPrice(DateTime from, DateTime to, int pricePerMin) {
   int duration = int.parse(calTotalTime(from, to));
-  int total = duration * 3000;
+  double total = duration * (pricePerMin / 60);
   return total;
 }

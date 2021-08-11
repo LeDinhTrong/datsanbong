@@ -6,12 +6,14 @@ class PasswordField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final errorText;
+  final onChanged;
   const PasswordField(
       {Key? key,
       required this.controller,
       required this.hintText,
       this.validator,
-      this.errorText})
+      this.errorText,
+      this.onChanged})
       : super(key: key);
 
   @override
@@ -21,6 +23,7 @@ class PasswordField extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
       child: TextFormField(
+        onChanged: onChanged,
         validator: validator,
         controller: controller,
         obscureText: showPass,

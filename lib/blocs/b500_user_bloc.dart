@@ -137,7 +137,7 @@ class UserBloc {
     try {
       var what = 504;
       var param = {"id": id};
-
+      listUser504 = [];
       await _repository.executeService(what, param).then((value) {
         if (value.length != 0) {
           listUser504.addAll(value);
@@ -187,14 +187,13 @@ class UserBloc {
   /**                                                                                                                                                                                           
    * callWhat502 update data User                                                                                                                             
    */
-  callWhat507(int id, String name, String phone, String email) async {
+  callWhat507(int id, String name, String phone) async {
     try {
       var what = 507;
       var param = {
         "id": "$id",
         "Name": name,
         "Phone": phone,
-        "Email": email,
       };
 
       await _repository.executeService(what, param).then((value) {

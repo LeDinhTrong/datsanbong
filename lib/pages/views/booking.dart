@@ -1,15 +1,16 @@
 import 'package:confirm_dialog/confirm_dialog.dart';
+import 'package:field_for_rent/blocs/b800_booking_bloc.dart';
 import 'package:field_for_rent/method/formatted_date.dart';
 import 'package:field_for_rent/models/m800_booking_model.dart';
 import 'package:field_for_rent/pages/components/bottom_navigation_bar.dart';
+import 'package:field_for_rent/pages/components/routes.dart';
 import 'package:field_for_rent/pages/constants.dart';
 import 'package:field_for_rent/pages/views/event_editing.dart';
-import 'package:field_for_rent/repositories/repositories.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class BookingPage extends StatefulWidget {
-  final String fieldId;
+  final int fieldId;
   BookingPage({required this.fieldId});
 
   @override
@@ -17,50 +18,153 @@ class BookingPage extends StatefulWidget {
 }
 
 class _BookingPageState extends State<BookingPage> {
-  final _repo = Repository();
-
-  Future<List<Event>> getBooking() async {
-    List<Event> bookingData = [];
-    await _repo.r800BookingProvider.p800Booking(800, {}).then((value) async {
-      for (var i = 0; i < value.length; i++) {
-        M800BookingModel bookingModel = value[i];
-        bookingData.add(Event(
-          eventName: bookingModel.Message.toString(),
-          from: convertTime(bookingModel.Start.toString()),
-          to: convertTime(bookingModel.End.toString()),
-        ));
-      }
-    });
-    return bookingData;
-  }
+  final _bookingBloc = BookingBloc();
+  List<M800BookingModel>? _bookinglist;
 
   @override
   void initState() {
     super.initState();
-    getBooking();
+    listent();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _bookingBloc.dispose();
+  }
+
+  listent() {
+    _bookingBloc.bookingStream807.listen((event) {
+      _bookinglist = event;
+    });
+
+    _init();
+  }
+
+  _init() async {
+    _bookingBloc.callWhat807(widget.fieldId);
+  }
+
+  Widget _calendarWidget(Size size, List<Event> eventList) {
+    return Expanded(
+      flex: 12,
+      child: SfCalendar(
+        view: CalendarView.month,
+        initialSelectedDate: DateTime.now(),
+        dataSource: EventDataSource(eventList),
+        monthViewSettings: MonthViewSettings(
+            showAgenda: true, agendaViewHeight: size.height * 0.3),
+      ),
+    );
+  }
+
+  Widget _addEvent() {
+    return Expanded(
+      flex: 2,
+      child: Container(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              backgroundColor: kPrimaryColor,
+              child: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => EventEditingPage(
+                              fieldId: widget.fieldId,
+                            ))).then((value) {
+                  setState(() {
+                    _bookingBloc.callWhat807(widget.fieldId);
+                  });
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bottomButton() {
+    return Expanded(
+      flex: 1,
+      child: Container(
+        height: double.infinity,
+        width: double.infinity,
+        child: Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              height: double.infinity,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: kPrimaryLightColor,
+              ),
+              child: Row(
+                children: [
+                  // Text(
+                  //   "Price: ",
+                  //   style: TextStyle(color: kPrimaryColor, fontSize: 20),
+                  // ),
+                  // for (var item in _eventList!)
+                  //   Text(
+                  //     "${calTotalPrice(item.from, item.to)}" + " vnd/h",
+                  //     style: TextStyle(color: Colors.white, fontSize: 20),
+                  //   ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  height: double.infinity,
+                  width: 150,
+                  child: ElevatedButton(
+                      style: ButtonStyle(
+                        foregroundColor:
+                            MaterialStateProperty.all<Color>(kPrimaryColor),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(kPrimaryColor),
+                      ),
+                      onPressed: () async {
+                        if (await confirm(
+                          context,
+                          title: Text('Confirm'),
+                          content: Text('Are you sure you want to booking?'),
+                          textOK: Text('Yes'),
+                          textCancel: Text('No'),
+                        )) {
+                          Navigator.pushReplacementNamed(context, navibarRoute);
+                        }
+                      },
+                      child: Text(
+                        "Booking",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      )),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget _calendarWidget(Size size, data) {
-      return Expanded(
-        flex: 12,
-        child: SfCalendar(
-          view: CalendarView.month,
-          initialSelectedDate: DateTime.now(),
-          dataSource: EventDataSource(data),
-          monthViewSettings: MonthViewSettings(
-              showAgenda: true, agendaViewHeight: size.height * 0.3),
-        ),
-      );
-    }
-
     Size size = MediaQuery.of(context).size;
-    return FutureBuilder(
-        future: getBooking(),
+    return StreamBuilder(
+        stream: _bookingBloc.bookingStream807,
         builder: (context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasData) {
-            print(snapshot.data.length);
             return Scaffold(
               appBar: AppBar(
                 backgroundColor: kPrimaryLightColor,
@@ -71,112 +175,23 @@ class _BookingPageState extends State<BookingPage> {
                 child: Column(
                   children: [
                     //Calendar widget
-                    _calendarWidget(size, snapshot.data),
-
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        color: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            FloatingActionButton(
-                              backgroundColor: kPrimaryColor,
-                              child: Icon(
-                                Icons.add,
-                                color: Colors.white,
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => EventEditingPage(
-                                              fieldId: widget.fieldId,
-                                            ))).then((value) {
-                                  setState(() {});
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Container(
-                        height: double.infinity,
-                        width: double.infinity,
-                        child: Stack(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10),
-                              height: double.infinity,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: kPrimaryLightColor,
-                              ),
-                              child: Row(
-                                children: [
-                                  // Text(
-                                  //   "Price: ",
-                                  //   style: TextStyle(color: kPrimaryColor, fontSize: 20),
-                                  // ),
-                                  // Text(
-                                  //   fieldModel.Price_Per_Hour.toString() + " vnd/h",
-                                  //   style: TextStyle(
-                                  //       color: Colors.white, fontSize: 20),
-                                  // ),
-                                ],
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  height: double.infinity,
-                                  width: 150,
-                                  child: ElevatedButton(
-                                      style: ButtonStyle(
-                                        foregroundColor:
-                                            MaterialStateProperty.all<Color>(
-                                                kPrimaryColor),
-                                        backgroundColor:
-                                            MaterialStateProperty.all<Color>(
-                                                kPrimaryColor),
-                                      ),
-                                      onPressed: () async {
-                                        if (await confirm(
-                                          context,
-                                          title: Text('Confirm'),
-                                          content: Text(
-                                              'Are you sure you want to booking?'),
-                                          textOK: Text('Yes'),
-                                          textCancel: Text('No'),
-                                        )) {
-                                          Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      BottomNaviBar()));
-                                        }
-                                      },
-                                      child: Text(
-                                        "Booking",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 20),
-                                      )),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    _calendarWidget(
+                        size,
+                        _bookinglist!
+                            .map((e) => Event(
+                                eventName: e.Message!,
+                                from: convertTime(e.Start!),
+                                to: convertTime(e.End!)))
+                            .toList()),
+                    _addEvent(),
+                    _bottomButton(),
                   ],
                 ),
               ),
             );
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error"));
           }
           return Container(
             height: double.infinity,

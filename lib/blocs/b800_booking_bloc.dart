@@ -1,3 +1,5 @@
+import 'package:field_for_rent/models/history_model.dart';
+
 import '../models/models.dart';
 import '../repositories/repositories.dart';
 import 'package:rxdart/rxdart.dart';
@@ -42,10 +44,9 @@ class BookingBloc {
       _bookingSubject808.stream;
 
   // for what 809
-  List<M800BookingModel> listBooking809 = [];
-  final _bookingSubject809 = PublishSubject<List<M800BookingModel>>();
-  Stream<List<M800BookingModel>> get bookingStream809 =>
-      _bookingSubject809.stream;
+  List<HistoryModel> listHistory809 = [];
+  final _historySubject809 = PublishSubject<List<HistoryModel>>();
+  Stream<List<HistoryModel>> get historyStream809 => _historySubject809.stream;
 
   /**                                                                                                                                                                                           
    * dispose subject                                                                                                                                                                            
@@ -57,7 +58,7 @@ class BookingBloc {
     _bookingSubject805.close();
     _bookingSubject807.close();
     _bookingSubject808.close();
-    _bookingSubject809.close();
+    _historySubject809.close();
   }
 
   /**                                                                                                                                                                                           
@@ -171,11 +172,11 @@ class BookingBloc {
   /**                                                                                                                                                                                           
    * callWhat807 get data with Field_Id                                                                                                                             
    */
-  callWhat807(String fieldId) async {
+  callWhat807(int fieldId) async {
     try {
       var what = 807;
       var param = {"Field_Id": fieldId};
-
+      listBooking807 = [];
       await _repository.executeService(what, param).then((value) {
         if (value.length != 0) {
           listBooking807.addAll(value);
@@ -224,12 +225,12 @@ class BookingBloc {
 
       await _repository.executeService(what, param).then((value) {
         if (value.length != 0) {
-          listBooking809.addAll(value);
+          listHistory809.addAll(value);
         } else {
-          listBooking809 = [];
+          listHistory809 = [];
         }
       }).whenComplete(() {
-        _bookingSubject809.sink.add(listBooking809);
+        _historySubject809.sink.add(listHistory809);
       });
     } catch (e) {
       print(e);

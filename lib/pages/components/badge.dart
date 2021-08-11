@@ -1,4 +1,3 @@
-import 'package:field_for_rent/pages/models/user_mode.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 

@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:field_for_rent/blocs/login_bloc.dart';
+import 'package:field_for_rent/method/validations.dart';
 import 'package:field_for_rent/models/m500_user_model.dart';
 import 'package:field_for_rent/pages/components/bottom_navigation_bar.dart';
 import 'package:field_for_rent/pages/components/input_field.dart';
 import 'package:field_for_rent/pages/components/or_divider.dart';
 import 'package:field_for_rent/pages/components/password_field.dart';
+import 'package:field_for_rent/pages/components/routes.dart';
 import 'package:field_for_rent/pages/components/social_icon.dart';
 import 'package:field_for_rent/pages/constants.dart';
 import 'package:field_for_rent/pages/views/signup_view.dart';
@@ -22,10 +24,13 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  SharedPreferences? prefs;
   final _repository = Repository();
   final _loginBloc = LoginBloc();
+  final globalKey = GlobalKey<FormState>();
   bool isLogin = false;
+  SharedPreferences? prefs;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -43,37 +48,34 @@ class _SignInPageState extends State<SignInPage> {
     param['Email'] = emailController.text.trim();
     param['Password'] = passwordController.text.trim();
 
-    if (_loginBloc.isValidEmail(emailController.text) == true &&
-        _loginBloc.isValidPass(passwordController.text) == true) {
-      await _repository.r500UserProvider
-          .p500User(508, param)
-          .then((value) async {
-        print(value.first.Email);
-        prefs = await SharedPreferences.getInstance();
-        print(prefs!.getString('access_token'));
-        await prefs!.setString('id', value[0].id);
-        if (value.length != 0) {
-          setState(() {
-            isLogin = true;
-          });
-          if (isLogin = true) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => BottomNaviBar()));
-          }
-          EasyLoading.showSuccess('Login Succsess!');
-        } else {
-          EasyLoading.showError('The email or password is incorrect');
-        }
-      }).catchError((error, stackTrace) {
-        print("loi");
-        EasyLoading.showError("The email or password is incorrect");
-      });
-    }
+    await _repository.r500UserProvider.p500User(508, param).then((value) async {
+      print("52 test ${value.first}");
+      prefs = await SharedPreferences.getInstance();
+      print(prefs!.getString('access_token'));
+      await prefs!.setString('id', value.first.id);
+      if (value.length != 0) {
+        Navigator.pushNamed(context, navibarRoute);
+
+        EasyLoading.showSuccess('Login Succsess!');
+      } else {
+        EasyLoading.showError('The email or password is incorrect');
+      }
+    }).catchError((error, stackTrace) {
+      print("loi");
+      EasyLoading.showError("The email or password is incorrect");
+    });
   }
 
-  builEmailFormField(AsyncSnapshot snapshot) {
+  builEmailFormField(snapshot) {
     return TextFormField(
       controller: emailController,
+      keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        Validations.validateEmail(value!);
+      },
+      onChanged: (value) {
+        _loginBloc.setEmail(value);
+      },
       decoration: InputDecoration(
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
@@ -86,7 +88,7 @@ class _SignInPageState extends State<SignInPage> {
           borderSide: BorderSide(color: Colors.grey),
           gapPadding: 10,
         ),
-        errorText: snapshot.hasError ? "${snapshot.error}" : null,
+        errorText: snapshot.hasError ? snapshot.error : null,
         hintText: "Email",
         hintStyle: TextStyle(color: kPrimaryColor),
         border: InputBorder.none,
@@ -94,10 +96,16 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  buiPasswordFormField(AsyncSnapshot snapshot) {
+  buiPasswordFormField(snapshot) {
     return TextFormField(
       controller: passwordController,
       obscureText: true,
+      validator: (value) {
+        Validations.validatePassword(value!);
+      },
+      onChanged: (value) {
+        _loginBloc.setPass(value);
+      },
       decoration: InputDecoration(
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
@@ -110,7 +118,7 @@ class _SignInPageState extends State<SignInPage> {
           borderSide: BorderSide(color: Colors.grey),
           gapPadding: 10,
         ),
-        errorText: snapshot.hasError ? "${snapshot.error}" : null,
+        errorText: snapshot.hasError ? snapshot.error : null,
         hintText: "Password",
         hintStyle: TextStyle(color: kPrimaryColor),
         border: InputBorder.none,
@@ -118,9 +126,38 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  final globalKey = GlobalKey<FormState>();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  Widget _socialMedia() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SocialIcon(iconSrc: "assets/icons/facebook.svg", onPress: () {}),
+        SocialIcon(iconSrc: "assets/icons/twitter.svg", onPress: () {}),
+        SocialIcon(iconSrc: "assets/icons/google-plus.svg", onPress: () {})
+      ],
+    );
+  }
+
+  Widget _chooseSignUp() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Don't have an account? ",
+          style: TextStyle(fontSize: 16),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => SignupPage()));
+          },
+          child: Text(
+            "Sign Up",
+            style: TextStyle(color: kPrimaryLightColor, fontSize: 16),
+          ),
+        )
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,13 +196,13 @@ class _SignInPageState extends State<SignInPage> {
                   child: Column(
                     children: [
                       StreamBuilder(
-                          stream: _loginBloc.emailStream,
-                          builder: (context, snapshot) {
+                          stream: _loginBloc.email,
+                          builder: (context, AsyncSnapshot snapshot) {
                             return builEmailFormField(snapshot);
                           }),
                       SizedBox(height: size.height * 0.02),
                       StreamBuilder(
-                          stream: _loginBloc.passwordStream,
+                          stream: _loginBloc.password,
                           builder: (context, AsyncSnapshot snapshot) {
                             return buiPasswordFormField(snapshot);
                           }),
@@ -199,39 +236,9 @@ class _SignInPageState extends State<SignInPage> {
                     )),
               ),
               OrDivider(text: "Or Sign In With"),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SocialIcon(
-                      iconSrc: "assets/icons/facebook.svg", onPress: () {}),
-                  SocialIcon(
-                      iconSrc: "assets/icons/twitter.svg", onPress: () {}),
-                  SocialIcon(
-                      iconSrc: "assets/icons/google-plus.svg", onPress: () {})
-                ],
-              ),
+              _socialMedia(),
               SizedBox(height: size.height * 0.02),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Don't have an account? ",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SignupPage()));
-                    },
-                    child: Text(
-                      "Sign Up",
-                      style: TextStyle(color: kPrimaryLightColor, fontSize: 16),
-                    ),
-                  )
-                ],
-              )
+              _chooseSignUp(),
             ],
           ),
         ),

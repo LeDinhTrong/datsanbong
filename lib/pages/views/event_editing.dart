@@ -1,3 +1,4 @@
+import 'package:field_for_rent/blocs/b700_footbalfield_bloc.dart';
 import 'package:field_for_rent/method/formatted_date.dart';
 import 'package:field_for_rent/method/utils.dart';
 import 'package:field_for_rent/pages/constants.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EventEditingPage extends StatefulWidget {
-  final String fieldId;
+  final int fieldId;
   final Event? event;
   EventEditingPage({this.event, required this.fieldId});
 
@@ -17,6 +18,7 @@ class EventEditingPage extends StatefulWidget {
 
 class _EventEditingPageState extends State<EventEditingPage> {
   SharedPreferences? _prefs;
+  final _fieldBloc = FootbalFieldBloc();
   final titleController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   DateTime? fromDate;
@@ -58,10 +60,21 @@ class _EventEditingPageState extends State<EventEditingPage> {
     }
   }
 
+  Future pickFromDateTime({required bool pickDate}) async {
+    final date = await pickDateTime(fromDate!, pickDate: pickDate);
+    if (date == null) return;
+
+    if (date.isAfter(toDate!)) {
+      toDate = DateTime(
+          date.year, date.month, date.day, toDate!.hour, toDate!.minute);
+    }
+    setState(() => fromDate = date);
+  }
+
   @override
   void initState() {
     super.initState();
-
+    _init();
     if (widget.event == null) {
       fromDate = DateTime.now();
       toDate = DateTime.now().add(Duration(hours: 2));
@@ -70,8 +83,57 @@ class _EventEditingPageState extends State<EventEditingPage> {
 
   @override
   void dispose() {
-    titleController.dispose();
     super.dispose();
+    titleController.dispose();
+    _fieldBloc.dispose();
+  }
+
+  _init() async {
+    _fieldBloc.callWhat704(widget.fieldId);
+  }
+
+  _pickStartDateTime() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: ListTile(
+            title: Text(Utils.toDate(fromDate!)),
+            trailing: Icon(Icons.arrow_drop_down),
+            onTap: () => pickFromDateTime(pickDate: true),
+          ),
+        ),
+        Expanded(
+          child: ListTile(
+            title: Text(Utils.toTime(fromDate!)),
+            trailing: Icon(Icons.arrow_drop_down),
+            onTap: () => pickFromDateTime(pickDate: false),
+          ),
+        ),
+      ],
+    );
+  }
+
+  _pickEndDateTime() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: ListTile(
+            title: Text(Utils.toDate(toDate!)),
+            trailing: Icon(Icons.arrow_drop_down),
+            onTap: () => pickToDateTime(pickDate: true),
+          ),
+        ),
+        Expanded(
+          child: ListTile(
+            title: Text(Utils.toTime(toDate!)),
+            trailing: Icon(Icons.arrow_drop_down),
+            onTap: () => pickToDateTime(pickDate: false),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -81,27 +143,36 @@ class _EventEditingPageState extends State<EventEditingPage> {
         backgroundColor: kPrimaryLightColor,
         leading: CloseButton(),
         actions: [
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              primary: Colors.transparent,
-              shadowColor: Colors.transparent,
-            ),
-            onPressed: () async {
-              _prefs = await SharedPreferences.getInstance();
-              final Repository _repo = Repository();
-              _repo.r800BookingProvider.p800Booking(801, {
-                "Message": titleController.text,
-                "Start": "$fromDate",
-                "End": "$toDate",
-                "Status": "0",
-                "User_Id": _prefs!.getString('id'),
-                "Field_Id": widget.fieldId,
-                "Total": "${calTotalPrice(fromDate!, toDate!)}",
-              });
-              Navigator.pop(context);
+          StreamBuilder(
+            stream: _fieldBloc.footbalFieldStream704,
+            builder: (context, AsyncSnapshot<dynamic> snapshot) {
+              return ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                ),
+                onPressed: () async {
+                  _prefs = await SharedPreferences.getInstance();
+                  final Repository _repo = Repository();
+                  _repo.r800BookingProvider.p800Booking(801, {
+                    "Message": titleController.text,
+                    "Start": "$fromDate",
+                    "End": "$toDate",
+                    "Status": "0",
+                    "User_Id": _prefs!.getString('id'),
+                    "Field_Id": widget.fieldId,
+                    "Total": "${calTotalPrice(
+                      fromDate!,
+                      toDate!,
+                      int.parse(snapshot.data.first.Price_Per_Hour),
+                    )}",
+                  });
+                  Navigator.pop(context, true);
+                },
+                icon: Icon(Icons.done),
+                label: Text("SAVE"),
+              );
             },
-            icon: Icon(Icons.done),
-            label: Text("SAVE"),
           ),
         ],
       ),
@@ -129,25 +200,7 @@ class _EventEditingPageState extends State<EventEditingPage> {
                     "From",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: ListTile(
-                          title: Text(Utils.toDate(fromDate!)),
-                          trailing: Icon(Icons.arrow_drop_down),
-                          onTap: () => pickFromDateTime(pickDate: true),
-                        ),
-                      ),
-                      Expanded(
-                        child: ListTile(
-                          title: Text(Utils.toTime(fromDate!)),
-                          trailing: Icon(Icons.arrow_drop_down),
-                          onTap: () => pickFromDateTime(pickDate: false),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _pickStartDateTime(),
                 ],
               ),
               Column(
@@ -157,25 +210,7 @@ class _EventEditingPageState extends State<EventEditingPage> {
                     "To",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: ListTile(
-                          title: Text(Utils.toDate(toDate!)),
-                          trailing: Icon(Icons.arrow_drop_down),
-                          onTap: () => pickToDateTime(pickDate: true),
-                        ),
-                      ),
-                      Expanded(
-                        child: ListTile(
-                          title: Text(Utils.toTime(toDate!)),
-                          trailing: Icon(Icons.arrow_drop_down),
-                          onTap: () => pickToDateTime(pickDate: false),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _pickEndDateTime(),
                 ],
               ),
             ],
@@ -184,21 +219,4 @@ class _EventEditingPageState extends State<EventEditingPage> {
       ),
     );
   }
-
-  Future pickFromDateTime({required bool pickDate}) async {
-    final date = await pickDateTime(fromDate!, pickDate: pickDate);
-    if (date == null) return;
-
-    if (date.isAfter(toDate!)) {
-      toDate = DateTime(
-          date.year, date.month, date.day, toDate!.hour, toDate!.minute);
-    }
-    setState(() => fromDate = date);
-  }
 }
-// Future<Map<String, dynamic>> getBookingEdit() async {
-//   Map<String, dynamic> data = {};
-//   final _repo = Repository();
-//   data["booking"] = await _repo.r800BookingProvider.p800Booking(800, {});
-//   return data;
-// }

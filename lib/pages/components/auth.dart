@@ -1,7 +1,7 @@
 class Validation {
   static String? validateEmail(String email) {
-    if (email == null) {
-      return "Email invalid";
+    if (email.isEmpty) {
+      return "Enter the email";
     }
     var isValid =
         RegExp(r"^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]").hasMatch(email);
@@ -12,11 +12,11 @@ class Validation {
   }
 
   static String? validatePassword(String password) {
-    if (password == null) {
-      return "Password invalid";
+    if (password.isEmpty) {
+      return "Enter the password";
     }
     if (password.length < 6) {
-      return "Password require minimum 6 characters";
+      return "The password must be at least 6 characters";
     }
     return null;
   }

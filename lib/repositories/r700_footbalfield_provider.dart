@@ -21,11 +21,7 @@ class R700FootbalFieldProvider {
       // Get all data from FootbalField
       case 700:
         try {
-          print(' trc700');
           final response = await DioUtil.post(param);
-          print('700');
-          print(param);
-          print('response $response');
           Map<String, dynamic> result = jsonDecode(response.toString());
           if (result['status'] == true) {
             return List<M700FootbalFieldModel>.from(result['data']

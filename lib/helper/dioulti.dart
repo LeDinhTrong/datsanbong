@@ -220,6 +220,7 @@ class DioUtil {
 
   // Request section
   static Future post(formData) async {
+    print(formData);
     try {
       Response response;
       dio.options.headers = httpHeaders;
@@ -308,6 +309,7 @@ class DioUtil {
 
   // Request section
   static Future postLogin(formData) async {
+    print(formData);
     try {
       Response response;
       dio.options.headers = httpHeaders;

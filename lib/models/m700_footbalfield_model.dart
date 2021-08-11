@@ -1,7 +1,7 @@
 import 'package:date_format/date_format.dart';
 
 class M700FootbalFieldModel {
-  String? id;
+  String? idField;
   String? Owner_Id;
   String? Name;
   String? Price_Per_Hour;
@@ -12,7 +12,7 @@ class M700FootbalFieldModel {
   String? Avatar_Url;
 
   M700FootbalFieldModel(
-      {this.id,
+      {this.idField,
       this.Owner_Id,
       this.Name,
       this.Price_Per_Hour,
@@ -23,7 +23,7 @@ class M700FootbalFieldModel {
       this.Avatar_Url});
 
   M700FootbalFieldModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+    idField = json['idField'];
     Owner_Id = json['Owner_Id'];
     Name = json['Name'];
     Price_Per_Hour = json['Price_Per_Hour'];
@@ -36,7 +36,7 @@ class M700FootbalFieldModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
+    data['idField'] = this.idField;
     data['Owner_Id'] = this.Owner_Id;
     data['Name'] = this.Name;
     data['Price_Per_Hour'] = this.Price_Per_Hour;

@@ -38,7 +38,6 @@ class FootbalFieldBloc {
   callWhat700() async {
     try {
       var what = 700;
-      print('222222');
       await _repository.executeService(what, {}).then((value) {
         if (value.length != 0) {
           listFootbalField700.addAll(value);
@@ -60,7 +59,7 @@ class FootbalFieldBloc {
   callWhat704(int id) async {
     try {
       var what = 704;
-      var param = {"id": id};
+      var param = {"idField": id};
 
       await _repository.executeService(what, param).then((value) {
         if (value.length != 0) {

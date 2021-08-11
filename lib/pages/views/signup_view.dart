@@ -1,7 +1,9 @@
 import 'package:field_for_rent/blocs/register_bloc.dart';
+import 'package:field_for_rent/method/validations.dart';
 import 'package:field_for_rent/pages/components/input_field.dart';
 import 'package:field_for_rent/pages/components/or_divider.dart';
 import 'package:field_for_rent/pages/components/password_field.dart';
+import 'package:field_for_rent/pages/components/routes.dart';
 import 'package:field_for_rent/pages/components/social_icon.dart';
 import 'package:field_for_rent/pages/constants.dart';
 import 'package:field_for_rent/pages/views/signin_view.dart';
@@ -17,6 +19,7 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  final valid = Validations();
   final _registerBloc = RegisterBloc();
   final _repo = Repository();
   final _formKey = GlobalKey<FormState>();
@@ -45,19 +48,32 @@ class _SignupPageState extends State<SignupPage> {
     param["Password"] = _passwordController.text.trim();
     param["Avatar_Url"] = "";
 
-    if (_registerBloc.isValidEmail(_emailController.text) == true &&
-        _registerBloc.isValidConfirmPass(
-                _passwordController.text, _confirmPassController.text) ==
-            true) {
-      await _repo.r500UserProvider
-          .p500User(501, param)
-          .catchError((error, stackTrace) {
-        SnackBar(content: Text("Error"));
+    if (valid.validEmail(_emailController.text) == true &&
+        valid.validPass(_passwordController.text) == true) {
+      await _repo.r500UserProvider.p500User(501, param).then((value) {
+        if (value.length != 0) {
+          Navigator.pushNamed(context, loginRoute);
+          EasyLoading.showSuccess("Register Success");
+        } else {
+          EasyLoading.showError("The value incorrect");
+        }
+      }).catchError((error, stackTrace) {
+        print("loi");
+        EasyLoading.showError("The value incorrect");
       });
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => SignInPage()));
-      EasyLoading.showSuccess("Register Success");
     }
+    EasyLoading.showError('The value incorrect');
+  }
+
+  Widget _socialMedia() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SocialIcon(iconSrc: "assets/icons/facebook.svg", onPress: () {}),
+        SocialIcon(iconSrc: "assets/icons/twitter.svg", onPress: () {}),
+        SocialIcon(iconSrc: "assets/icons/google-plus.svg", onPress: () {})
+      ],
+    );
   }
 
   @override
@@ -89,28 +105,43 @@ class _SignupPageState extends State<SignupPage> {
                 InputField(controller: _nameController, hintText: "Name"),
                 InputField(controller: _phoneController, hintText: "Phone"),
                 StreamBuilder(
-                  stream: _registerBloc.emailStream,
+                  stream: _registerBloc.email,
                   builder: (context, AsyncSnapshot<dynamic> snapshot) {
                     return InputField(
+                      onChanged: (value) {
+                        _registerBloc.setEmail(value);
+                      },
                       controller: _emailController,
                       hintText: "Email",
-                      errorText: snapshot.hasError ? "${snapshot.error}" : null,
+                      errorText: snapshot.hasError ? snapshot.error : null,
                     );
                   },
                 ),
                 StreamBuilder(
-                  stream: _registerBloc.passwordStream,
+                  stream: _registerBloc.password,
                   builder: (context, AsyncSnapshot<dynamic> snapshot) {
                     return PasswordField(
+                      onChanged: (value) {
+                        _registerBloc.setPass(value);
+                      },
                       controller: _passwordController,
                       hintText: "Password",
-                      errorText: snapshot.hasError ? "${snapshot.error}" : null,
+                      errorText: snapshot.hasError ? snapshot.error : null,
                     );
                   },
                 ),
-                PasswordField(
-                    controller: _confirmPassController,
-                    hintText: "Confirm Password"),
+                StreamBuilder(
+                    stream: _registerBloc.confirmPassword,
+                    builder: (context, AsyncSnapshot<dynamic> snapshot) {
+                      return PasswordField(
+                        onChanged: (value) {
+                          _registerBloc.setConfirmPass(value);
+                        },
+                        controller: _confirmPassController,
+                        hintText: "Confirm Password",
+                        errorText: snapshot.hasError ? snapshot.error : null,
+                      );
+                    }),
                 Container(
                   margin: EdgeInsets.only(top: size.height * 0.03),
                   width: size.width * 0.9,
@@ -135,17 +166,7 @@ class _SignupPageState extends State<SignupPage> {
                       )),
                 ),
                 OrDivider(text: "Or Sign Up With"),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SocialIcon(
-                        iconSrc: "assets/icons/facebook.svg", onPress: () {}),
-                    SocialIcon(
-                        iconSrc: "assets/icons/twitter.svg", onPress: () {}),
-                    SocialIcon(
-                        iconSrc: "assets/icons/google-plus.svg", onPress: () {})
-                  ],
-                ),
+                _socialMedia(),
               ],
             ),
           ),

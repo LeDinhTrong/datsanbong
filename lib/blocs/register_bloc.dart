@@ -1,40 +1,59 @@
 import 'dart:async';
 
 import 'package:field_for_rent/method/validations.dart';
+import 'package:rxdart/rxdart.dart';
 
 final valid = Validations();
 
 class RegisterBloc {
-  StreamController _emailController = StreamController();
-  StreamController _passwordController = StreamController();
+  final _email = BehaviorSubject<String>();
+  final _password = BehaviorSubject<String>();
+  final _confirmPassword = BehaviorSubject<String>();
 
-  Stream get emailStream => _emailController.stream;
-  Stream get passwordStream => _passwordController.stream;
+  void setEmail(String value) => _email.sink.add(value);
+  void setPass(String value) => _password.sink.add(value);
+  void setConfirmPass(String value) => _confirmPassword.sink.add(value);
 
-  bool isValidEmail(String email) {
-    if (valid.validEmail(email) == false) {
-      _emailController.sink.addError(
-          "Email invalid. Email must have '@', longer than 3 characters and\n is not emty");
-      return false;
+  Stream<String> get email => _email.stream.transform(emailValidate);
+  Stream<String> get password => _password.stream.transform(passValidate);
+  Stream<String> get confirmPassword =>
+      _confirmPassword.stream.transform(passValidate).doOnData((event) {
+        if (0 != getPassTxt.compareTo(event)) {
+          _confirmPassword.addError("The passwords do not match");
+        }
+      });
+
+  String get getEmailTxt => _email.value;
+  String get getPassTxt => _password.value;
+  String get getConfirmPassTxt => _confirmPassword.value;
+
+  var emailValidate =
+      StreamTransformer<String, String>.fromHandlers(handleData: (email, sink) {
+    var isValid =
+        RegExp(r"^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]").hasMatch(email);
+    if (email.isEmpty) {
+      sink.addError('Enter the email');
+    } else if (!isValid) {
+      sink.addError('Email invalid');
     } else {
-      _emailController.sink.add("Success");
-      return true;
+      sink.add(email);
     }
-  }
+  });
 
-  bool isValidConfirmPass(String pass, String confirmPass) {
-    if (valid.validConfirmPass(pass, confirmPass) == false) {
-      _passwordController.sink.addError(
-          "Password invalid. Password must longer than 6 characters, is not\n emty, password = confirm password");
-      return false;
+  var passValidate =
+      StreamTransformer<String, String>.fromHandlers(handleData: (pass, sink) {
+    if (pass.isEmpty) {
+      sink.addError('Enter the password');
+    } else if (pass.length < 6) {
+      sink.addError("Email invalid. Please include an '@' in the email");
     } else {
-      _passwordController.sink.add("Success");
-      return true;
+      sink.add(pass);
     }
-  }
+  });
 
   void dispose() {
-    _emailController.close();
-    _passwordController.close();
+    _email.close();
+    _password.close();
+    _confirmPassword.close();
   }
 }

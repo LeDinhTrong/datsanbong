@@ -88,7 +88,7 @@ class ImageFieldBloc {
   /**                                                                                                                                                                                           
    * callWhat907 get data with Field_Id                                                                                                                             
    */
-  callWhat907(String fieldId) async {
+  callWhat907(int fieldId) async {
     try {
       var what = 907;
       var param = {"Field_Id": fieldId};
