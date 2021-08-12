@@ -1,12 +1,6 @@
-import 'dart:async';
-
 import 'package:field_for_rent/blocs/login_bloc.dart';
 import 'package:field_for_rent/method/validations.dart';
-import 'package:field_for_rent/models/m500_user_model.dart';
-import 'package:field_for_rent/pages/components/bottom_navigation_bar.dart';
-import 'package:field_for_rent/pages/components/input_field.dart';
 import 'package:field_for_rent/pages/components/or_divider.dart';
-import 'package:field_for_rent/pages/components/password_field.dart';
 import 'package:field_for_rent/pages/components/routes.dart';
 import 'package:field_for_rent/pages/components/social_icon.dart';
 import 'package:field_for_rent/pages/constants.dart';
@@ -49,9 +43,7 @@ class _SignInPageState extends State<SignInPage> {
     param['Password'] = passwordController.text.trim();
 
     await _repository.r500UserProvider.p500User(508, param).then((value) async {
-      print("52 test ${value.first}");
       prefs = await SharedPreferences.getInstance();
-      print(prefs!.getString('access_token'));
       await prefs!.setString('id', value.first.id);
       if (value.length != 0) {
         Navigator.pushNamed(context, navibarRoute);

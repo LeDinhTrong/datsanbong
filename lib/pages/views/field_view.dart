@@ -19,6 +19,7 @@ class FieldPage extends StatefulWidget {
 }
 
 class _FieldPageState extends State<FieldPage> {
+  bool sort = false;
   final _fieldBloc = FootbalFieldBloc();
   final _repo = Repo();
   final _reposi = Reposi();
@@ -28,9 +29,8 @@ class _FieldPageState extends State<FieldPage> {
   var destinationLat;
   var destinationLng;
   var distanceCal;
-  List distanceList = [];
   List<M700FootbalFieldModel>? _fieldModel;
-  List<M700FootbalFieldModel> _filterField = [];
+  List<CardModel> _filterField = [];
   List<CardModel> _cardModel = [];
 
   @override
@@ -48,12 +48,36 @@ class _FieldPageState extends State<FieldPage> {
 
   listent() {
     _fieldBloc.footbalFieldStream700.listen((event) async {
-      _fieldModel = _fieldBloc.listFootbalField700;
-      _filterField = _fieldModel!;
+      _fieldModel = event;
       for (var i = 0; i < _fieldModel!.length; i++) {
-        distanceList.add(i);
-        getDistance(_fieldModel![i].Address!, i);
+        LocationModel locationModel;
+        locationModel = await _repo.getApi(_fieldModel![i].Address!);
+        destinationLat = locationModel.result[0].location.lat;
+        destinationLng = locationModel.result[0].location.lng;
+
+        DistanceModel distanceModel;
+        distanceModel = await _reposi.getApi(
+            startLat, startLng, destinationLat, destinationLng);
+        distanceCal = distanceModel.result.routes[0].distance.text;
+
+        _cardModel.add(CardModel(
+          _fieldModel![i].idField!,
+          _fieldModel![i].Name!,
+          _fieldModel![i].Description!,
+          _fieldModel![i].OpenAt!,
+          _fieldModel![i].CloseAt!,
+          _fieldModel![i].Price_Per_Hour!,
+          distanceCal,
+          _fieldModel![i].Avatar_Url!,
+        ));
+
+        // if (_filterField.length == _cardModel.length) {
+        //   _filterField = _cardModel;
+        // }
       }
+      setState(() {
+        _filterField = _cardModel;
+      });
     });
     _init();
   }
@@ -70,27 +94,10 @@ class _FieldPageState extends State<FieldPage> {
     startLng = currentLocation.longitude;
   }
 
-  getDistance(String address, int i) async {
-    LocationModel locationModel;
-    DistanceModel distanceModel;
-    locationModel = await _repo.getApi(address);
-    destinationLat = locationModel.result[0].location.lat;
-    destinationLng = locationModel.result[0].location.lng;
-
-    distanceModel = await _reposi.getApi(
-        startLat, startLng, destinationLat, destinationLng);
-    if (distanceModel.result.routes.length > 0) {
-      distanceCal = distanceModel.result.routes[0].distance.text;
-      setState(() {
-        distanceList[i] = distanceCal;
-      });
-    }
-  }
-
   void searchFilter(String keyWord) {
-    final filterSearch = _fieldModel!
+    final filterSearch = _cardModel
         .where((element) =>
-            element.Name!.toLowerCase().contains(keyWord.toLowerCase()))
+            element.name.toLowerCase().contains(keyWord.toLowerCase()))
         .toList();
 
     setState(() {
@@ -120,7 +127,21 @@ class _FieldPageState extends State<FieldPage> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                   ),
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if (sort == false) {
+                          setState(() {
+                            sort = true;
+                            _filterField.sort(
+                                (a, b) => a.distance.compareTo(b.distance));
+                          });
+                        } else {
+                          setState(() {
+                            sort = false;
+                            _filterField.sort(
+                                (a, b) => b.distance.compareTo(a.distance));
+                          });
+                        }
+                      },
                       icon: Icon(
                         Icons.short_text_rounded,
                         color: Colors.black,
@@ -145,11 +166,11 @@ class _FieldPageState extends State<FieldPage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Text(
-              "${_filterField[i].Name}",
+              "${_filterField[i].name}",
               style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
             ),
             Text(
-              "${_filterField[i].Description}",
+              "${_filterField[i].description}",
               style: TextStyle(color: Color(0xffC4C4C4)),
             ),
             Wrap(
@@ -157,18 +178,15 @@ class _FieldPageState extends State<FieldPage> {
                 FakeTextSpan(
                     text1: "Start: ",
                     text2:
-                        "${convertDate(_filterField[i].OpenAt.toString())} h"),
+                        "${convertDate(_filterField[i].start.toString())} h"),
                 FakeTextSpan(
                     text1: " to: ",
-                    text2:
-                        "${convertDate(_filterField[i].CloseAt.toString())} h"),
+                    text2: "${convertDate(_filterField[i].to.toString())} h"),
               ],
             ),
+            FakeTextSpan(text1: "Price: ", text2: "${_filterField[i].price}"),
             FakeTextSpan(
-                text1: "Price: ", text2: "${_filterField[i].Price_Per_Hour}"),
-            FakeTextSpan(
-                text1: "Distance:  ",
-                text2: '${distanceList.length > 0 ? distanceList[i] : 0}'),
+                text1: "Distance:  ", text2: '${_filterField[i].distance}'),
           ],
         ),
       ),
@@ -180,65 +198,48 @@ class _FieldPageState extends State<FieldPage> {
       stream: _fieldBloc.footbalFieldStream700,
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         if (snapshot.hasData) {
-          for (var i = 0; i < _fieldModel!.length; i++) {
-            _cardModel.add(CardModel(
-              _fieldModel![i].Name!,
-              _fieldModel![i].Description!,
-              _fieldModel![i].OpenAt!,
-              _fieldModel![i].CloseAt!,
-              _fieldModel![i].Price_Per_Hour!,
-              distanceList[i].toString(),
-            ));
-            print(_cardModel.length);
-            print(_cardModel);
-            print("_cardModel.length");
-          }
-          return _filterField.length > 0
-              ? Expanded(
-                  flex: 7,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 15),
-                    child: ListView.builder(
-                        itemCount: _filterField.length,
-                        itemBuilder: (context, i) {
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => FieldDetail(
-                                            idField: int.parse(
-                                                _filterField[i].idField!),
-                                          )));
-                            },
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      height: 180,
-                                      padding: EdgeInsets.all(7),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          image: DecorationImage(
-                                              image: AssetImage(
-                                                  "${_filterField[i].Avatar_Url}"),
-                                              fit: BoxFit.cover)),
-                                    ),
-                                  ),
-                                  _fieldInfomation(i),
-                                ],
+          return Expanded(
+            flex: 7,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: ListView.builder(
+                  itemCount: _filterField.length,
+                  itemBuilder: (context, i) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FieldDetail(
+                                      idField: int.parse(_filterField[i].id),
+                                    )));
+                      },
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                height: 180,
+                                padding: EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            "${_filterField[i].avatar}"),
+                                        fit: BoxFit.cover)),
                               ),
                             ),
-                          );
-                        }),
-                  ),
-                )
-              : Text("No results found");
+                            _fieldInfomation(i),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+            ),
+          );
         } else {
           return Center(
             child: CircularProgressIndicator(),
@@ -250,7 +251,6 @@ class _FieldPageState extends State<FieldPage> {
 
   @override
   Widget build(BuildContext context) {
-    // distanceList.sort((a, b) => a.compareTo(b));
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Color(0xfff6f6f9),
@@ -267,12 +267,14 @@ class _FieldPageState extends State<FieldPage> {
 }
 
 class CardModel {
+  String id;
   String name;
   String description;
   String start;
   String to;
   String price;
   String distance;
-  CardModel(this.name, this.description, this.start, this.to, this.price,
-      this.distance);
+  String avatar;
+  CardModel(this.id, this.name, this.description, this.start, this.to,
+      this.price, this.distance, this.avatar);
 }

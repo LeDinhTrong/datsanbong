@@ -225,7 +225,7 @@ class DioUtil {
       Response response;
       dio.options.headers = httpHeaders;
       response = await dio.post(Ulti.BASE_URL_API, data: formData);
-
+      print('228' + response.toString());
       if (checkStatusCodeSuccess(response.statusCode!)) {
         return response;
       } else {

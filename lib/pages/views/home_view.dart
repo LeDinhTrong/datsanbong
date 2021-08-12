@@ -1,6 +1,7 @@
 import 'package:field_for_rent/blocs/b500_user_bloc.dart';
 import 'package:field_for_rent/blocs/b700_footbalfield_bloc.dart';
 import 'package:field_for_rent/models/m700_footbalfield_model.dart';
+import 'package:field_for_rent/pages/components/common.dart';
 import 'package:field_for_rent/pages/components/routes.dart';
 import 'package:field_for_rent/pages/components/text_span.dart';
 import 'package:field_for_rent/pages/constants.dart';
@@ -10,6 +11,7 @@ import 'package:field_for_rent/pages/views/distance/calcu_distance/repositories.
 import 'package:field_for_rent/pages/views/distance/location_field/location_model.dart';
 import 'package:field_for_rent/pages/views/distance/location_field/repositories.dart';
 import 'package:field_for_rent/pages/views/field_detail.dart';
+import 'package:field_for_rent/pages/views/field_view.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,8 +34,8 @@ class _HomePageState extends State<HomePage> {
   var destinationLng;
   var distanceCal;
   SharedPreferences? _prefs;
-  List distanceList = [];
   List<M700FootbalFieldModel>? _fieldModelList;
+  List<CardModel> _cardModel = [];
 
   @override
   void initState() {
@@ -50,11 +52,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   listent() {
-    _fieldBloc.footbalFieldStream700.listen((event) {
+    _fieldBloc.footbalFieldStream700.listen((event) async {
       _fieldModelList = event;
       for (var i = 0; i < _fieldModelList!.length; i++) {
-        distanceList.add(i);
-        getDistance(_fieldModelList![i].Address!, i);
+        LocationModel locationModel;
+        locationModel = await _repo.getApi(_fieldModelList![i].Address!);
+        destinationLat = locationModel.result[0].location.lat;
+        destinationLng = locationModel.result[0].location.lng;
+
+        DistanceModel distanceModel;
+        distanceModel = await _reposi.getApi(
+            startLat, startLng, destinationLat, destinationLng);
+        distanceCal = distanceModel.result.routes[0].distance.text;
+
+        _cardModel.add(CardModel(
+          _fieldModelList![i].idField!,
+          _fieldModelList![i].Name!,
+          _fieldModelList![i].Description!,
+          _fieldModelList![i].OpenAt!,
+          _fieldModelList![i].CloseAt!,
+          _fieldModelList![i].Price_Per_Hour!,
+          distanceCal,
+          _fieldModelList![i].Avatar_Url!,
+        ));
+        setState(() {
+          _cardModel.sort((a, b) => a.distance.compareTo(b.distance));
+        });
       }
     });
     _init();
@@ -71,24 +94,6 @@ class _HomePageState extends State<HomePage> {
         desiredAccuracy: LocationAccuracy.high);
     startLat = currentLocation.latitude;
     startLng = currentLocation.longitude;
-  }
-
-  getDistance(String address, int i) async {
-    LocationModel locationModel;
-    DistanceModel distanceModel;
-
-    locationModel = await _repo.getApi(address);
-    destinationLat = locationModel.result[0].location.lat;
-    destinationLng = locationModel.result[0].location.lng;
-
-    distanceModel = await _reposi.getApi(
-        startLat, startLng, destinationLat, destinationLng);
-    if (distanceModel.result.routes.length > 0) {
-      distanceCal = distanceModel.result.routes[0].distance.text;
-      setState(() {
-        distanceList[i] = distanceCal;
-      });
-    }
   }
 
   _accountOnPress(BuildContext context) {
@@ -163,11 +168,8 @@ class _HomePageState extends State<HomePage> {
         ),
         SizedBox(height: size.height * 0.01),
         Text(
-          "with your friends and let's play outdoor",
-          style: TextStyle(color: Colors.white),
-        ),
-        Text(
-          "and indoor fooball",
+          slogan,
+          textAlign: TextAlign.center,
           style: TextStyle(color: Colors.white),
         ),
       ],
@@ -208,15 +210,15 @@ class _HomePageState extends State<HomePage> {
 
   Widget _listCard() {
     return ListView.builder(
-        itemCount: _fieldModelList!.length,
+        itemCount: _cardModel.length,
         itemBuilder: (BuildContext context, int i) {
           return GestureDetector(
             onTap: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => FieldDetail(
-                          idField: int.parse(_fieldModelList![i].idField!))));
+                      builder: (context) =>
+                          FieldDetail(idField: int.parse(_cardModel[i].id))));
             },
             child: Card(
               shape: RoundedRectangleBorder(
@@ -231,18 +233,16 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _fieldModelList![i].Name.toString(),
+                            _cardModel[i].name,
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w500),
                           ),
                           FakeTextSpan(
                               text1: "Distance: ",
-                              text2:
-                                  '${distanceList.length > 0 ? distanceList[i] : 0}'),
+                              text2: '${_cardModel[i].distance}'),
                           FakeTextSpan(
                               text1: "Price: ",
-                              text2: "${_fieldModelList![i].Price_Per_Hour}" +
-                                  " vnd/h"),
+                              text2: "${_cardModel[i].price}" + " vnd/h"),
                         ],
                       ),
                     ),
@@ -256,8 +256,7 @@ class _HomePageState extends State<HomePage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: DecorationImage(
-                              image: AssetImage(
-                                  "${_fieldModelList![i].Avatar_Url}"),
+                              image: AssetImage("${_cardModel[i].avatar}"),
                               fit: BoxFit.cover),
                         )),
                   ),

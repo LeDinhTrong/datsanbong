@@ -74,7 +74,6 @@ class _FieldDetailState extends State<FieldDetail> {
     return StreamBuilder(
       stream: _fieldBloc.footbalFieldStream704,
       builder: (context, AsyncSnapshot<dynamic> snapshot) {
-        print(snapshot.data);
         if (snapshot.hasData) {
           return snapshot.data.length > 0
               ? Scaffold(
@@ -111,12 +110,18 @@ class _FieldDetailState extends State<FieldDetail> {
                                 horizontal: 20, vertical: 25),
                             child: SingleChildScrollView(
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "${_fieldModel!.Name}",
-                                    style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w500),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "${_fieldModel!.Name}",
+                                        style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
                                   ),
                                   SizedBox(height: size.height * 0.03),
                                   Text(
@@ -125,7 +130,24 @@ class _FieldDetailState extends State<FieldDetail> {
                                   SizedBox(height: size.height * 0.03),
                                   Row(
                                     children: [
-                                      Text("Telephone Number: "),
+                                      FakeTextSpan(
+                                          text1: "Start: ",
+                                          text2:
+                                              "${convertDate("${_fieldModel!.OpenAt}")} h"),
+                                      FakeTextSpan(
+                                          text1: " to: ",
+                                          text2:
+                                              "${convertDate("${_fieldModel!.CloseAt}")} h"),
+                                    ],
+                                  ),
+                                  SizedBox(height: size.height * 0.01),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "Telephone Number: ",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w700),
+                                      ),
                                       InkWell(
                                         onTap: () async {
                                           launch("tel:0322564588");
@@ -139,18 +161,9 @@ class _FieldDetailState extends State<FieldDetail> {
                                     ],
                                   ),
                                   SizedBox(height: size.height * 0.01),
-                                  Row(
-                                    children: [
-                                      FakeTextSpan(
-                                          text1: "Start: ",
-                                          text2:
-                                              "${convertDate("${_fieldModel!.OpenAt}")} h"),
-                                      FakeTextSpan(
-                                          text1: " to: ",
-                                          text2:
-                                              "${convertDate("${_fieldModel!.CloseAt}")} h"),
-                                    ],
-                                  ),
+                                  FakeTextSpan(
+                                      text1: "Address: ",
+                                      text2: "${_fieldModel!.Address}"),
                                   _imageField(),
                                 ],
                               ),

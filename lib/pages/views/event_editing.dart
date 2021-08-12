@@ -31,6 +31,17 @@ class _EventEditingPageState extends State<EventEditingPage> {
     setState(() => toDate = date);
   }
 
+  Future pickFromDateTime({required bool pickDate}) async {
+    final date = await pickDateTime(fromDate!, pickDate: pickDate);
+    if (date == null) return;
+
+    if (date.isAfter(toDate!)) {
+      toDate = DateTime(
+          date.year, date.month, date.day, toDate!.hour, toDate!.minute);
+    }
+    setState(() => fromDate = date);
+  }
+
   Future<DateTime?> pickDateTime(
     DateTime initialDate, {
     required bool pickDate,
@@ -58,17 +69,6 @@ class _EventEditingPageState extends State<EventEditingPage> {
       final time = Duration(hours: timeOfDay.hour, minutes: timeOfDay.minute);
       return date.add(time);
     }
-  }
-
-  Future pickFromDateTime({required bool pickDate}) async {
-    final date = await pickDateTime(fromDate!, pickDate: pickDate);
-    if (date == null) return;
-
-    if (date.isAfter(toDate!)) {
-      toDate = DateTime(
-          date.year, date.month, date.day, toDate!.hour, toDate!.minute);
-    }
-    setState(() => fromDate = date);
   }
 
   @override

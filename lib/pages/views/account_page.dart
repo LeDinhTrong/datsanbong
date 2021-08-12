@@ -4,7 +4,6 @@ import 'package:field_for_rent/models/m500_user_model.dart';
 import 'package:field_for_rent/pages/components/routes.dart';
 import 'package:field_for_rent/pages/constants.dart';
 import 'package:field_for_rent/pages/views/edit_information.dart';
-import 'package:field_for_rent/pages/views/signin_view.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -2,7 +2,6 @@ import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:field_for_rent/blocs/b800_booking_bloc.dart';
 import 'package:field_for_rent/method/formatted_date.dart';
 import 'package:field_for_rent/models/m800_booking_model.dart';
-import 'package:field_for_rent/pages/components/bottom_navigation_bar.dart';
 import 'package:field_for_rent/pages/components/routes.dart';
 import 'package:field_for_rent/pages/constants.dart';
 import 'package:field_for_rent/pages/views/event_editing.dart';

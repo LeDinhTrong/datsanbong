@@ -11,9 +11,7 @@ class R500UserProvider {
     DioUtil.tokenInter();
   }
 
-  /**                                                                                                                  
-   *                                                                                                                   
-   */
+  ///
   Future<dynamic> p500User(int what, Map<String, dynamic> param) async {
     param['what'] = what;
 
@@ -151,8 +149,9 @@ class R500UserProvider {
       case 508:
         try {
           final response = await DioUtil.postLogin(param);
+          print('testtttttttttttt: ' + response.toString());
           Map<String, dynamic> result = jsonDecode(response.toString());
-          print('test: ${result}');
+
           if (result['status'] == true) {
             return List<M500UserModel>.from(
                 result['data'].map((model) => M500UserModel.fromJson(model)));
