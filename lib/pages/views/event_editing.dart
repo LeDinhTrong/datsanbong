@@ -40,6 +40,7 @@ class _EventEditingPageState extends State<EventEditingPage> {
           date.year, date.month, date.day, toDate!.hour, toDate!.minute);
     }
     setState(() => fromDate = date);
+    print(fromDate);
   }
 
   Future<DateTime?> pickDateTime(
