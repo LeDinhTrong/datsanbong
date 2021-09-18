@@ -23,18 +23,18 @@ class ImageFieldBloc {
   Stream<List<M900ImageFieldModel>> get imageFieldStream907 =>
       _imageFieldSubject907.stream;
 
-  /**                                                                                                                                                                                           
-   * dispose subject                                                                                                                                                                            
-   */
+  ///
+  ///dispose subject
+  ///
   void dispose() {
     _imageFieldSubject900.close();
     _imageFieldSubject905.close();
     _imageFieldSubject907.close();
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat900 get all data ImageField                                                                                                                             
-   */
+  ///
+  ///callWhat900 get all data ImageField
+  ///
   callWhat900() async {
     try {
       var what = 900;
@@ -54,12 +54,12 @@ class ImageFieldBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat905 get data limit                                                                                                                                                  
-   * @page : number pagination                                                                                                                                                                  
-   * @limit : limit of pagination                                                                                                                                                               
-   * @isPullRefresh: default is false                                                                                                                                                           
-   */
+  ///
+  ///callWhat905 get data limit
+  ///@page : number pagination
+  ///@limit : limit of pagination
+  ///@isPullRefresh: default is false
+  ///
   callWhat905(int page, int limit, {bool isPullRefresh: false}) async {
     try {
       var what = 905;
@@ -85,9 +85,9 @@ class ImageFieldBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat907 get data with Field_Id                                                                                                                             
-   */
+  ///
+  ///callWhat907 get data with Field_Id
+  ///
   callWhat907(int fieldId) async {
     try {
       var what = 907;

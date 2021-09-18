@@ -1,17 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
-
 import 'package:dio/dio.dart';
 import 'package:field_for_rent/repositories/repositories.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http_parser/http_parser.dart';
-
 import 'package:async/async.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
-
 import 'ulti.dart';
 
 const httpHeaders = {

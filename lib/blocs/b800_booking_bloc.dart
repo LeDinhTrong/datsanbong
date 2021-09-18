@@ -48,9 +48,9 @@ class BookingBloc {
   final _historySubject809 = PublishSubject<List<HistoryModel>>();
   Stream<List<HistoryModel>> get historyStream809 => _historySubject809.stream;
 
-  /**                                                                                                                                                                                           
-   * dispose subject                                                                                                                                                                            
-   */
+  ///
+  /// dispose subject
+  ///
   void dispose() {
     _bookingSubject800.close();
     _bookingSubject801.close();
@@ -61,9 +61,9 @@ class BookingBloc {
     _historySubject809.close();
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat800 get all data Booking                                                                                                                             
-   */
+  ///
+  /// ignore: slash_for_doc_comments
+  /// callWhat800 get all data Booking
   callWhat800() async {
     try {
       var what = 800;
@@ -83,9 +83,9 @@ class BookingBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat801 insert data                                                                                                                            
-   */
+  ///
+  ///callWhat801 insert data
+  ///
   callWhat801(String eventName, DateTime from, DateTime to, int status,
       String userId, String fieldId, String total) async {
     try {
@@ -115,9 +115,9 @@ class BookingBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat803 delete all data Booking                                                                                                                             
-   */
+  ///
+  ///callWhat803 delete all data Booking
+  ///
   callWhat803(int id) async {
     try {
       var what = 803;
@@ -138,12 +138,12 @@ class BookingBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat805 get data limit                                                                                                                                                  
-   * @page : number pagination                                                                                                                                                                  
-   * @limit : limit of pagination                                                                                                                                                               
-   * @isPullRefresh: default is false                                                                                                                                                           
-   */
+  ///
+  ///callWhat805 get data limit
+  ///@page : number pagination
+  ///@limit : limit of pagination
+  ///@isPullRefresh: default is false
+  ///
   callWhat805(int page, int limit, {bool isPullRefresh: false}) async {
     try {
       var what = 805;
@@ -169,9 +169,9 @@ class BookingBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat807 get data with Field_Id                                                                                                                             
-   */
+  ///
+  ///callWhat807 get data with Field_Id
+  ///
   callWhat807(int fieldId) async {
     try {
       var what = 807;
@@ -192,9 +192,9 @@ class BookingBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat808 get data with User_Id                                                                                                                             
-   */
+  ///
+  ///callWhat808 get data with User_Id
+  ///
   callWhat808(int userId) async {
     try {
       var what = 808;
@@ -215,9 +215,9 @@ class BookingBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat808 get data with User_Id and Field_Name                                                                                                                            
-   */
+  ///
+  ///callWhat808 get data with User_Id and Field_Name
+  ///
   callWhat809(int userId) async {
     try {
       var what = 809;

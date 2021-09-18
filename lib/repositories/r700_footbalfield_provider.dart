@@ -22,7 +22,7 @@ class R700FootbalFieldProvider {
       case 700:
         try {
           final response = await DioUtil.post(param);
-          print('Ưhat700' + response.toString());
+          print('What700' + response.toString());
           Map<String, dynamic> result = jsonDecode(response.toString());
           if (result['status'] == true) {
             return List<M700FootbalFieldModel>.from(result['data']

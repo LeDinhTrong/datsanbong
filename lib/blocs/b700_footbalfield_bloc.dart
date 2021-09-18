@@ -23,18 +23,18 @@ class FootbalFieldBloc {
   Stream<List<M700FootbalFieldModel>> get footbalFieldStream705 =>
       _footbalFieldSubject705.stream;
 
-  /**                                                                                                                                                                                           
-   * dispose subject                                                                                                                                                                            
-   */
+  ///
+  ///dispose subject
+  ///
   void dispose() {
     _footbalFieldSubject700.close();
     _footbalFieldSubject704.close();
     _footbalFieldSubject705.close();
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat700 get all data FootbalField                                                                                                                             
-   */
+  ///
+  ///callWhat700 get all data FootbalField
+  ///
   callWhat700() async {
     try {
       var what = 700;
@@ -53,9 +53,9 @@ class FootbalFieldBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat704 get data with id                                                                                                                             
-   */
+  ///
+  ///callWhat704 get data with id
+  ///
   callWhat704(int id) async {
     try {
       var what = 704;
@@ -76,12 +76,12 @@ class FootbalFieldBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat705 get data limit                                                                                                                                                  
-   * @page : number pagination                                                                                                                                                                  
-   * @limit : limit of pagination                                                                                                                                                               
-   * @isPullRefresh: default is false                                                                                                                                                           
-   */
+  ///
+  /// callWhat705 get data limit
+  /// @page : number pagination
+  /// @limit : limit of pagination
+  /// @isPullRefresh: default is false
+  ///
   callWhat705(int page, int limit, {bool isPullRefresh: false}) async {
     try {
       var what = 705;

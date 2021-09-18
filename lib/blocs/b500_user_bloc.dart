@@ -35,9 +35,9 @@ class UserBloc {
   final _userSubject507 = PublishSubject<List<M500UserModel>>();
   Stream<List<M500UserModel>> get userStream507 => _userSubject507.stream;
 
-  /**                                                                                                                                                                                           
-   * dispose subject                                                                                                                                                                            
-   */
+  ///
+  ///dispose subject
+  ///
   void dispose() {
     _userSubject500.close();
     _userSubject501.close();
@@ -47,9 +47,9 @@ class UserBloc {
     _userSubject507.close();
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat500 get all data User                                                                                                                             
-   */
+  ///
+  ///callWhat500 get all data User
+  ///
   callWhat500() async {
     try {
       var what = 500;
@@ -69,9 +69,9 @@ class UserBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat501 insert data User                                                                                                                             
-   */
+  ///
+  ///callWhat501 insert data User
+  ///
   callWhat501(String name, String phone, String email, String password,
       String avatarUrl) async {
     try {
@@ -99,9 +99,9 @@ class UserBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat502 update data User                                                                                                                             
-   */
+  ///
+  ///callWhat502 update data User
+  ///
   callWhat502(int id, String name, String phone, String email, String password,
       String avatarUrl) async {
     try {
@@ -130,9 +130,9 @@ class UserBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat504 get data with id                                                                                                                             
-   */
+  ///
+  ///callWhat504 get data with id
+  ///
   callWhat504(int id) async {
     try {
       var what = 504;
@@ -153,12 +153,12 @@ class UserBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat505 get data limit                                                                                                                                                  
-   * @page : number pagination                                                                                                                                                                  
-   * @limit : limit of pagination                                                                                                                                                               
-   * @isPullRefresh: default is false                                                                                                                                                           
-   */
+  ///
+  ///callWhat505 get data limit
+  ///@page : number pagination
+  ///@limit : limit of pagination
+  ///@isPullRefresh: default is false
+  ///
   callWhat505(int page, int limit, {bool isPullRefresh: false}) async {
     try {
       var what = 505;
@@ -184,9 +184,9 @@ class UserBloc {
     }
   }
 
-  /**                                                                                                                                                                                           
-   * callWhat502 update data User                                                                                                                             
-   */
+  ///
+  ///callWhat502 update data User
+  ///
   callWhat507(int id, String name, String phone) async {
     try {
       var what = 507;

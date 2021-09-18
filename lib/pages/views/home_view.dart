@@ -182,7 +182,7 @@ class _HomePageState extends State<HomePage> {
       builder: (context, AsyncSnapshot<dynamic> snapshot) {
         if (snapshot.hasData) {
           return Expanded(
-              flex: 2,
+              flex: 3,
               child: Container(
                   padding: EdgeInsets.symmetric(vertical: 7, horizontal: 7),
                   decoration: BoxDecoration(
@@ -273,7 +273,7 @@ class _HomePageState extends State<HomePage> {
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           return Expanded(
-            flex: 3,
+            flex: 4,
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Stack(children: [

@@ -15,17 +15,17 @@ class AdminBloc {
   final _adminSubject405 = PublishSubject<List<M400AdminModel>>();                                                      
   Stream<List<M400AdminModel>> get adminStream405 => _adminSubject405.stream;   
 																																																
-  /**                                                                                                                                                                                           
-   * dispose subject                                                                                                                                                                            
-   */                                                                                                                                                                                           
+  ///                                                                                                                                                                                           
+  ///dispose subject                                                                                                                                                                            
+  ///                                                                                                                                                                                           
   void dispose() {                                                                                                                                                                              
     _adminSubject400.close();                                                                                                                             
     _adminSubject405.close();                                                                                                                           
   }                                                                                                                                                                                             
 																																																
-  /**                                                                                                                                                                                           
-   * callWhat400 get all data Admin                                                                                                                             
-   */                                                                                                                                                                                           
+  ///                                                                                                                                                                                           
+  ///callWhat400 get all data Admin                                                                                                                             
+  ///                                                                                                                                                                                           
   callWhat400() async {                                                                                                                                                            
     try {                                                                                                                                                                                       
       var what = 400;                                                                                                                                                              
@@ -45,12 +45,12 @@ class AdminBloc {
     }                                                                                                                                                                                           
   }                                                                                                                                                                                             
 																																																
-  /**                                                                                                                                                                                           
-   * callWhat405 get data limit                                                                                                                                                  
-   * @page : number pagination                                                                                                                                                                  
-   * @limit : limit of pagination                                                                                                                                                               
-   * @isPullRefresh: default is false                                                                                                                                                           
-   */                                                                                                                                                                                           
+  ///                                                                                                                                                                                           
+  ///callWhat405 get data limit                                                                                                                                                  
+  ///@page : number pagination                                                                                                                                                                  
+  ///@limit : limit of pagination                                                                                                                                                               
+  ///@isPullRefresh: default is false                                                                                                                                                           
+  ///                                                                                                                                                                                           
   callWhat405(int page, int limit, {bool isPullRefresh : false}) async {                                                                                                         
     try {                                                                                                                                                                                       
       var what = 405;                                                                                                                                                            
